@@ -1,0 +1,19 @@
+<form>
+  검색어<input type="text" name="user_input" />
+  <input type="submit" />
+</form>
+<ul>
+  {{#each data}}
+  <li><h3>{{title}}</h3>
+    <ul>
+      <li>{{author}}</li>
+      <li>{{pub}}</li>
+      <li>{{pub_year}}</li>
+      <li>{{isbn}}</li>
+      <li>{{price}}</li>
+    </ul>
+  </li>
+  {{else}}
+  <li>No data</li>
+  {{/each}}
+</ul>

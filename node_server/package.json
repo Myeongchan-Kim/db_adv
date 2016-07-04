@@ -1,5 +1,5 @@
 {
-  "name": "food",
+  "name": "db_adv",
   "version": "1.0.0",
   "description": "",
   "main": "food.js",
@@ -12,6 +12,7 @@
     "body-parser": "^1.15.1",
     "express": "^4.13.4",
     "express-handlebars": "^3.0.0",
+    "mssql": "^3.3.0",
     "mysql": "^2.11.1",
     "util": "^0.10.3"
   }
