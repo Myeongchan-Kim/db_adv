@@ -4,8 +4,7 @@ var url = 'mongodb://125.209.194.219:27017/company';
 
 var express = require('express');
 var app = express();
-var handlebars = require('express-handlebars')
-.create({ defaultLayout:'main'}); //템플릿
+var handlebars = require('express-handlebars').create({ defaultLayout:'main'}); //템플릿
 var bodyparser = require('body-parser').urlencoded({extended:true}); //form 평문전달
 var util = require('util');
 
@@ -33,7 +32,7 @@ var mongoSearch = function( url, collectionName, condition, callback){
 }
 
 app.get('/', function(req, res){
-  mongoSearch(url,'employee', undefined, function (docs){
+  mongoSearch(url,'employee', null, function (docs){
     res.render('employee', {data: docs});
   });
 });
