@@ -1,0 +1,18 @@
+<!-- <form>
+  검색어<input type="text" name="user_input" />
+  <input type="submit" />
+</form> -->
+<ul>
+  {{#each data}}
+  <li><h3>{{name}}</h3>
+    <ul>
+      <li>ssn : {{ssn}}</li>
+      <li>sex : {{sex}}</li>
+      <li>주소 : {{addr}}</li>
+      <li>연봉 : {{salary}}</li>
+    </ul>
+  </li>
+  {{else}}
+  <li>No data</li>
+  {{/each}}
+</ul>
