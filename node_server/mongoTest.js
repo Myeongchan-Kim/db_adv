@@ -32,6 +32,22 @@ app.get('/', function(req, res){
   });
 });
 
+app.post('/', function(req, res){
+  MongoClient.connect(url, function (err, db){
+    db.authenticate('next', '12345678', function (err, res){
+      if(err) throw err;
+    });
+    var collection = db.collection('employee');
+    var condition = {name:{$regex:req.body.user_input}};
+    collection.find(condition).toArray(function(err, docs){
+      if(err) throw err;
+      //console.log(docs);
+      db.close();
+      res.render('employee', {data: docs, val:req.body.user_input});
+    });
+  });
+});
+
 app.use(function (req, res){
   res.type('text/plain');
   res.status('404');
