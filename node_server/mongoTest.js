@@ -17,34 +17,31 @@ app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 app.set('port', process.env.PORT || 3000);
 
-app.get('/', function(req, res){
-  MongoClient.connect(url, function (err, db){
+var mongoSearch = function( url, collectionName, condition, callback){
+  MongoClient.connect(url, function(err, db){
     db.authenticate('next', '12345678', function (err, res){
       if(err) throw err;
+      var collection = db.collection(collectionName);
+      collection.find(condition).toArray(function(err, docs){
+        if(err) throw err;
+        //console.log(docs);
+        db.close();
+        callback(docs);
+      });
     });
-    var collection = db.collection('employee');
-    collection.find({}).toArray(function(err, docs){
-      if(err) throw err;
-      //console.log(docs);
-      db.close();
-      res.render('employee', {data: docs});
-    });
+  });
+}
+
+app.get('/', function(req, res){
+  mongoSearch(url,'employee', undefined, function (docs){
+    res.render('employee', {data: docs});
   });
 });
 
 app.post('/', function(req, res){
-  MongoClient.connect(url, function (err, db){
-    db.authenticate('next', '12345678', function (err, res){
-      if(err) throw err;
-    });
-    var collection = db.collection('employee');
-    var condition = {name:{$regex:req.body.user_input}};
-    collection.find(condition).toArray(function(err, docs){
-      if(err) throw err;
-      //console.log(docs);
-      db.close();
-      res.render('employee', {data: docs, val:req.body.user_input});
-    });
+  var condition = {name:{$regex:req.body.user_input}};
+  mongoSearch(url,'employee', condition, function (docs){
+    res.render('employee', {data: docs});
   });
 });
 
