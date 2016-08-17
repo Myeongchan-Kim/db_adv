@@ -40,7 +40,7 @@ app.get('/', function(req, res){
 app.post('/', function(req, res){
   var condition = {name:{$regex:req.body.user_input}};
   mongoSearch(url,'employee', condition, function (docs){
-    res.render('employee', {data: docs});
+    res.render('employee', {data: docs, val:req.body.user_input});
   });
 });
 
