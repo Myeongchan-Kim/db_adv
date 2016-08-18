@@ -1,0 +1,18 @@
+<form>
+  검색어<input type="text" name="user_input" />
+  <input type="submit" />
+</form>
+<ul>
+  {{#each data}}
+  <li><h3>{{store_name}}</h3>
+    <ul>
+      <li>{{category}}</li>
+      <li>{{big_location}}</li>
+      <li>{{small_location}}</li>
+      <li>{{description}}</li>
+    </ul>
+  </li>
+  {{else}}
+  <li>No data</li>
+  {{/each}}
+</ul>
