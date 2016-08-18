@@ -24,6 +24,10 @@ app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 app.set('port', process.env.PORT || 3000);
 
+app.get('/', function (req, res){
+  res.render('index', {});
+});
+
 app.use(function (req, res){
   res.type('text/plain');
   res.status('404');
