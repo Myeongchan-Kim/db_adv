@@ -36,17 +36,22 @@ var findMongoTest = function (callback){
       var collection = db.collection('country');
       //console.log(collection);
       var country = {'country_name' : 'Aruba'};
+      var result = {};
       collection.findOne(country, function (err, docs){
-        console.log(docs);
-        var condition = ({year:1980, country_code:docs['_id']});
-        console.log(condition);
-
-        db.collection('education_new').find(condition).toArray(function(err, docs){
-          if(err) throw err;
-          db.close();
-          callback(docs);
-        });
-      }); //find condition
+        result = docs;
+      });
+      collection.aggregate([{
+        $lookUp:
+        {
+          from:"education_new",
+          localField: "_id",
+          foreignField : "country_code",
+          as :"embeddedData"
+        }
+      }]).toArray(function(err, result){
+      console.log(result);
+      callback(result)
+      });
     }); // db auth
   }); //mongo connect
 };
@@ -80,10 +85,14 @@ app.get('/data-req', function(req, res){;
     indicator_name : 'Rural land area where elevation is below 5 meters (% of total land area)',
     year : 1990,
   }
-  findByIndicator( condition, function (docs){
+  findMongoTest(function (docs){
     res.type('text/plain');
     res.send(JSON.stringify(docs));
   });
+  // findByIndicator( condition, function (docs){
+  //   res.type('text/plain');
+  //   res.send(JSON.stringify(docs));
+  // });
 });
 
 app.use(function (req, res){
