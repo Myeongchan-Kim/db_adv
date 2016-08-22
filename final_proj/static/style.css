@@ -1,0 +1,26 @@
+/**{
+  margin : 0;
+  padding : 0;
+  border : 0;
+  background-color: #EEEEEE;
+}
+*/
+#screen{
+  width:900px;
+  height:600px;
+  background-color: #EEEEFF;
+}
+
+#control_box_div{
+  width:900px;
+  height:60px;
+  background-color : gray;
+}
+
+div.bar{
+  display: inline-block;
+  width:20px;
+  height:75px;
+  background-color: teal;
+  margin-right: 2px;
+}
