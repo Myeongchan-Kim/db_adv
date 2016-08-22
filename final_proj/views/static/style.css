@@ -1,0 +1,11 @@
+#screen{
+  width:800px;
+  height:600px;
+  background-color: blue;
+}
+
+#control_box_div{
+  width:800px;
+  height:100px;
+  background-color : gray;
+}
