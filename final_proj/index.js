@@ -29,28 +29,49 @@ app.get('/', function (req, res){
   res.render('index', {});
 });
 
-var findMongoTest = function (callback){
+var findValue = function(db, id, callback ){
+  console.log("result:"+JSON.stringify(id));
+  db.collection('education').aggregate([
+    {
+        $match: {
+            year : 1990,
+            "country_code" : id
+        }//match
+    },
+    {
+        $lookup : {
+          from: "country",
+          localField: "country_code",
+          foreignField : "_id",
+          as :"country"
+        }
+    },
+    {
+        $lookup : {
+          from: "indicator",
+          localField: "indicator_code",
+          foreignField : "_id",
+          as :"indicator"
+        }
+    },
+  ]).toArray(function(err, docs){
+    console.log(docs);
+    callback(docs);
+  });// aggregate
+};
+
+var findMongoTest = function (country_name, callback){
   MongoClient.connect(url, function(err, db){
     db.authenticate('next', '1234', function (err, res){
       if(err) throw err;
       var collection = db.collection('country');
       //console.log(collection);
-      var country = {'country_name' : 'Aruba'};
-      var result = {};
+      var country = {'country_name' : country_name};
       collection.findOne(country, function (err, docs){
-        result = docs;
-      });
-      collection.aggregate([{
-        $lookUp:
-        {
-          from:"education_new",
-          localField: "_id",
-          foreignField : "country_code",
-          as :"embeddedData"
-        }
-      }]).toArray(function(err, result){
-      console.log(result);
-      callback(result)
+        if(err) throw err;
+        console.log(docs['_id']);
+        var id = docs['_id'];
+        findValue(db, id, callback);
       });
     }); // db auth
   }); //mongo connect
@@ -85,7 +106,7 @@ app.get('/data-req', function(req, res){;
     indicator_name : 'Rural land area where elevation is below 5 meters (% of total land area)',
     year : 1990,
   }
-  findMongoTest(function (docs){
+  findMongoTest('Argentina', function (docs){
     res.type('text/plain');
     res.send(JSON.stringify(docs));
   });
