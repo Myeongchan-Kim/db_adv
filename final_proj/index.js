@@ -100,21 +100,42 @@ var findByIndicator = function (cond, callback){
   }); //mongo connect
 };
 
+var findAllCountry = function (callback){
+  MongoClient.connect(url, function(err, db){
+    db.authenticate('next', '1234', function (err, res){
+      if(err) throw err;
+      var collection = db.collection('country');
+      collection.aggregate([{
+          "$project" : { "country_name" : 1 , "region" : 1}
+      }]).toArray(function(err, docs){
+        callback(docs);
+      });
+    }); // auth
+  }); //mongo connect
+};
 
-app.get('/data-req', function(req, res){;
+
+app.get('/data-req', function(req, res){
   var condition = {
     indicator_name : 'Rural land area where elevation is below 5 meters (% of total land area)',
     year : 1990,
   }
-  findMongoTest('Argentina', function (docs){
-    res.type('text/plain');
-    res.send(JSON.stringify(docs));
-  });
-  // findByIndicator( condition, function (docs){
+  // findMongoTest('Argentina', function (docs){
   //   res.type('text/plain');
   //   res.send(JSON.stringify(docs));
   // });
+  findByIndicator(condition, function (docs){
+    res.type('text/plain');
+    res.send(JSON.stringify(docs));
+  });
 });
+
+app.get('/all-country', function(req, res){
+  findAllCountry(function (docs){
+    res.type('text/plain');
+    res.send(JSON.stringify(docs));
+  });
+})
 
 app.use(function (req, res){
   res.type('text/plain');
