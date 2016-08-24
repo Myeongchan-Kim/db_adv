@@ -34,7 +34,11 @@ var make_circle = function (docs){
     .attr("cx", function (d, i){return Math.random() * width; })
     .attr("cy", function (d, i){return Math.random() * height;})
     .attr("r", "20px")
-    .attr("fill","blue")
+    .attr("fill", function (d, i){
+      return "rgb("+Math.floor(Math.random()*255)+","
+      +Math.floor(Math.random()*255)+","
+      +Math.floor(Math.random()*255)+")";
+    })
     .attr("stroke", "orange")
     .attr("stroke-width", "3px");
 
