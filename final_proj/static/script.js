@@ -13,6 +13,7 @@ var init = function (){
 }
 
 var click_event = function (e){
+  console.log(e.target.tagName);
   if(e.target.tagName == "BUTTON"){
     changeCircleRandom();
   }

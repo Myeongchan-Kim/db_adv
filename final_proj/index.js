@@ -8,8 +8,11 @@ var pool = mysql.createPool({
   host : 'localhost',
   database : 'world',
   user : 'guest',
-  password : '1234'
+  password : mongoPW
 });
+
+var mongoID = "next";
+var mongoPW = "1234";
 
 var express = require('express');
 var app = express();
@@ -62,7 +65,7 @@ var findValue = function(db, id, callback ){
 
 var findMongoTest = function (country_name, callback){
   MongoClient.connect(url, function(err, db){
-    db.authenticate('next', '1234', function (err, res){
+    db.authenticate(mongoID, mongoPW, function (err, res){
       if(err) throw err;
       var collection = db.collection('country');
       //console.log(collection);
@@ -80,7 +83,7 @@ var findMongoTest = function (country_name, callback){
 var findByIndicator = function (cond, callback){
 //Rural land area where elevation is below 5 meters (% of total land area)
   MongoClient.connect(url, function(err, db){
-    db.authenticate('next', '1234', function (err, res){
+    db.authenticate(mongoID, mongoPW, function (err, res){
       if(err) throw err;
       var collection = db.collection('indicator');
       //console.log(collection);
@@ -102,12 +105,25 @@ var findByIndicator = function (cond, callback){
 
 var findAllCountry = function (callback){
   MongoClient.connect(url, function(err, db){
-    db.authenticate('next', '1234', function (err, res){
+    db.authenticate(mongoID, mongoPW, function (err, res){
       if(err) throw err;
       var collection = db.collection('country');
       collection.aggregate([{
           "$project" : { "country_name" : 1 , "region" : 1}
       }]).toArray(function(err, docs){
+        callback(docs);
+      });
+    }); // auth
+  }); //mongo connect
+};
+
+var loadIndicator = function (category, callback){
+  MongoClient.connect(url, function(err, db){
+    db.authenticate(mongoID, mongoPW, function (err, res){
+      if(err) throw err;
+      var collection = db.collection('indicator');
+      collection.find({ "topic" : { "$regex" : RegExp(category)}})
+      .toArray(function(err, docs){
         callback(docs);
       });
     }); // auth
@@ -135,7 +151,15 @@ app.get('/all-country', function(req, res){
     res.type('text/plain');
     res.send(JSON.stringify(docs));
   });
-})
+});
+
+app.get('/indicator/:category', function(req, res){
+  loadIndicator(req.params.category, function (docs){
+    //console.log(req.params.category);
+    res.type('text/plain');
+    res.send(JSON.stringify(docs));
+  });
+});
 
 app.use(function (req, res){
   res.type('text/plain');

@@ -1,7 +1,29 @@
 <div class="main_container">
   <div class="toggleable control_box">
-  <input type="text" name="year" />
-  <button>change</button>
+    <div class="year_wrapper">
+      <label for="year">year</label>
+      <input type="text" name="year" />
+      <button class="year_set">change</button>
+    </div><!--year_wrapper-->
+    <div class="attribute_wrapper">
+      <label for="x_attr">x:</label>
+      <select id="x_attr">
+        <option value="1">1</option>
+      </select>
+      <label for="y_attr">y:</label>
+      <select id="y_attr">
+        <option value="1">1</option>
+      </select>
+      <label for="size_attr">size:</label>
+      <select>
+        <option value="1">1</option>
+      </select>
+      <label for="bright_attr">bright:</label>
+      <select id="bright_attr">
+        <option value="1">1</option>
+      </select>
+      <button class="attr_set">set</button>
+    </div><!--year_wrapper-->
   </div>
   <div id="screen">
   </div>
