@@ -2,26 +2,20 @@
   <div class="toggleable control_box">
     <div class="year_wrapper">
       <label for="year">year</label>
-      <input type="text" name="year" />
+      <input type="number" name="year" value="1960" />
       <button class="year_set">change</button>
     </div><!--year_wrapper-->
     <div class="attribute_wrapper">
-      <label for="x_attr">x:</label>
-      <select id="x_attr">
-        <option value="1">1</option>
-      </select>
-      <label for="y_attr">y:</label>
-      <select id="y_attr">
-        <option value="1">1</option>
-      </select>
-      <label for="size_attr">size:</label>
-      <select>
-        <option value="1">1</option>
-      </select>
-      <label for="bright_attr">bright:</label>
-      <select id="bright_attr">
-        <option value="1">1</option>
-      </select>
+      {{#each indexObj}}
+      <div class="index_div">
+        <label for="{{@key}}_attr">{{@key}}:</label>
+        <select id="{{@key}}_attr">
+          <option value="{{this}}">
+            {{this}}
+          </option>
+        </select>
+      </div>
+      {{/each}}
       <button class="attr_set">set</button>
     </div><!--year_wrapper-->
   </div>

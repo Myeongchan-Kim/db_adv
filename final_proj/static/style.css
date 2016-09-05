@@ -13,14 +13,17 @@
 
 div.control_box{
   width:900px;
-  height:60px;
+  height:55px;
   background-color : gray;
 }
 
-div.bar{
-  display: inline-block;
-  width:20px;
-  height:75px;
-  background-color: teal;
-  margin-right: 2px;
+div.index_div{
+  float :left;
+  margin-right : 20px;
+  width: 180px;
+  overflow:hidden;
+}
+
+div.index_div select{
+  width: 130px;
 }

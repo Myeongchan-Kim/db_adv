@@ -29,7 +29,14 @@ app.set('view engine', 'handlebars');
 app.set('port', process.env.PORT || 3000);
 
 app.get('/', function (req, res){
-  res.render('index', {});
+  var index = {
+    'x' : /Life expectancy at birth, total \(years\)/,
+    'y' : /GDP per capita \(current US\$\)/,
+    'size' : /GDP \(current US\$\)/,
+    'color' :  /Literacy rate, adult total /,
+  };
+
+  res.render('index', {indexObj : index});
 });
 
 var findValue = function(db, id, callback ){
