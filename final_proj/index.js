@@ -32,7 +32,7 @@ app.get('/', function (req, res){
   var index = {
     'x' : /Life expectancy at birth, total \(years\)/,
     'y' : /GDP per capita \(current US\$\)/,
-    'size' : /GDP \(current US\$\)/,
+    'size' : /Population, total/,
     'color' :  /Literacy rate, adult total /,
   };
   res.render('index', {indexObj : index});

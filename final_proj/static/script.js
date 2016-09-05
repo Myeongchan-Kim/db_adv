@@ -1,6 +1,6 @@
 var width = 900;
 var height = 600;
-var callNum = 2;
+var callNum = 3;
 var dataset = {
   'country_name' : [],
   'x' : [],
@@ -12,6 +12,9 @@ var dataset = {
   'minX' : 987654321,
   'minY' : 987654321,
 };
+var selected_country = ["Korea, Rep."];
+
+
 var init = function (){
   var xhr = new XMLHttpRequest();
   xhr.open('GET', 'http://localhost:3000/all-country', true);
@@ -20,18 +23,32 @@ var init = function (){
     dataset['country_name'] = docs.map(function(ele){return ele['country_name'];});
     var svg = d3.select("#screen").append("svg");
     svg.attr("width", width).attr("height", height);
-    var circles = svg.selectAll("circle").data(dataset['country_name']).enter().append("circle");
+    var elementEnter = svg.selectAll("circle").data(dataset['country_name']).enter();
+
+    var labels = elementEnter.append("text");
+    labels
+    .attr("dx", 100)
+    .attr("dy", 100)
+    .text(function(d){
+      if(selected_country.indexOf(d) >= 0)
+        return d;
+      else "";
+    });
+
+    var circles = elementEnter.append("circle");
     circles.text(function(d){return d;})
     .attr("cx", 0)
     .attr("cy", height)
-    .attr("r", "20px")
+    .attr("r", "2px")
     .attr("fill", function (d, i){
-      return "rgb("+Math.floor(Math.random()*255)+","
+      return "rgba("+Math.floor(Math.random()*255)+","
       +Math.floor(Math.random()*255)+","
-      +Math.floor(Math.random()*255)+")";
+      +Math.floor(Math.random()*255)+","
+      +0.6+")";
     })
     .attr("stroke", "orange")
-    .attr("stroke-width", "3px");
+    .attr("stroke-width", "2px");
+
   });
   xhr.send(null);
 }
@@ -40,6 +57,17 @@ var click_event = function (e){
   //console.log(e.target.tagName);
   if(e.target.tagName == "BUTTON" && e.target.id === "changeButton"){
     changeCicle();
+  }
+  if(e.target.tagName == "BUTTON" && e.target.id === "playButton"){
+    var itervalEvent = setInterval(function(){
+      var year = document.getElementById("year_input");
+      year.value = Number(year.value) + 1;
+      changeCicle();
+      if(year.value >= 2014) {
+        var year = document.getElementById("year_input");
+        year.value = 1960;
+        clearInterval(itervalEvent)};
+    }, 1200);
   }
   if(e.target.tagName == "BUTTON" && e.target.id === "loadData"){
     console.log("Load Data");
@@ -66,6 +94,17 @@ var click_event = function (e){
     });
     xhr2.send(null);
 
+    //life_expect
+    var xhr3 = new XMLHttpRequest();
+    xhr3.open('GET', 'http://localhost:3000/indicator/health/Population%2C%20total', true);
+    xhr3.addEventListener("load", function (e){
+      var docs  = JSON.parse(xhr3.responseText);
+      console.log("Population Load");
+      load_population(docs);
+      callNum -= 1;
+      if(callNum == 0) changeCicle();
+    });
+    xhr3.send(null);
   }
   if(e.target.tagName == "circle"){
     //console.log("circle!!");
@@ -78,6 +117,10 @@ var load_gdbPerCapita = function(data){
 
 var load_life_expect = function(data){
   dataset['y'] = data.map(function(ele){return ele['value'];});
+};
+
+var load_population = function(data){
+  dataset['size'] = data.map(function(ele){return ele['value'];});
 };
 
 var changeCircleRandom = function(){
@@ -115,13 +158,18 @@ var make_circle = function (year){
         break;
       }
     }
+    for( j in dataset['size'][i]){
+      if(parseInt(dataset['size'][i][j]['year']) == year){
+        obj['size'] = Number(dataset['size'][i][j]['value']);
+        break;
+      }
+    }
     //console.log(obj['country_name'] + " " +obj['x'] + " " + obj['y']);
     yearData.push(obj);
   }
-  console.log("X:" + [dataset['minX'], dataset['maxX']]);
-  console.log("Y:" + [dataset['minY'], dataset['maxY']]);
-  var scaleX = d3.scaleLinear().domain([0, 10000]).range([0, width]);
-  var scaleY = d3.scaleLinear().domain([30, 80]).range([0, height]);
+  var scaleX = d3.scaleLog().domain([20, 80000]).range([0, width]);
+  var scaleY = d3.scaleLinear().domain([30, 80]).range([height, 0]);
+  var scaleSize = d3.scaleLog().domain([1000, 2000000000]).range([1, 30]);
 
   //change circle
   console.log(yearData[i]);
@@ -130,17 +178,36 @@ var make_circle = function (year){
   circles
     .attr("cx", function (d, i){
       if(yearData[i]['x'])
-        return scaleX(yearData[i]['x']);
+        return scaleX(Number(yearData[i]['x']));
       else
         return d['x'];
       })
     .attr("cy", function (d, i){
       if(yearData[i]['y'])
-        return height-scaleY(yearData[i]['y']);
+        return scaleY(yearData[i]['y']);
       else
         return d['y'];
     })
-    .attr("r", "20px");
+    .attr("r", function(d,i){
+      if(yearData[i]['size'])
+        return "" + scaleSize(yearData[i]['size']) +"px";
+      else
+        return d['r'];
+    });
+  var labels = svg.selectAll("text").transition();
+  labels
+  .attr("dx", function (d, i){
+    if(yearData[i]['x'])
+      return scaleX(Number(yearData[i]['x']));
+    else
+      return d['x'];
+    })
+  .attr("dy", function (d, i){
+    if(yearData[i]['y'])
+      return scaleY(yearData[i]['y']);
+    else
+      return d['y'];
+  })
 }
 
 var make_random_circle = function (dataset){
