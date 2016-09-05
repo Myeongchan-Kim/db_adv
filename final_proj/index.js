@@ -35,8 +35,7 @@ app.get('/', function (req, res){
     'size' : /GDP \(current US\$\)/,
     'color' :  /Literacy rate, adult total /,
   };
-
-  res.render('index', {indexObj : index});
+  res.render('index', {indexObj : index, data:docs});
 });
 
 var findValue = function(db, id, callback ){
@@ -124,6 +123,44 @@ var findAllCountry = function (callback){
   }); //mongo connect
 };
 
+var getAllValueOfIndicator = function (collectionName,indicator_id, indicator_name,callback){
+  MongoClient.connect(url, function(err, db){
+    db.authenticate(mongoID, mongoPW, function (err, res){
+      if(err) throw err;
+      //make new table;
+      var id_obj = new ObjectId(indicator_id);
+      db.collection(collectionName).aggregate([
+        { $match : { indicator_code : id_obj } },
+        { $out : "_"+indicator_name }
+      ]).toArray(function (err, docs){
+        if(err) throw err;
+        var country = db.collection('country');
+        country.aggregate([
+          {
+              $lookup :{
+                from: "_"+indicator_name,
+                localField: "_id",
+                foreignField : "country_code",
+                as :"value"
+              }
+          },
+          {
+              $project :{
+                  country_name : 1,
+                  value :{
+                      year : 1,
+                      value : 1
+                  }
+              }
+          }
+        ]).toArray(function(err, docs){
+          callback(docs);
+        });
+      });
+    }); // auth
+  }); //mongo connect
+}
+
 var loadIndicator = function (category, callback){
   MongoClient.connect(url, function(err, db){
     db.authenticate(mongoID, mongoPW, function (err, res){
@@ -168,6 +205,21 @@ app.get('/indicator/:category', function(req, res){
   });
 });
 
+app.get('/indicator/:category/:indicator_name', function(req, res){
+  MongoClient.connect(url, function(err, db){
+    var collection = db.collection('indicator');
+    //console.log(collection);
+    var condition = {'name' : {$regex : new RegExp(req.params.indicator_name)} };
+    collection.findOne(condition, function (err, docs){
+      getAllValueOfIndicator(req.params.category, docs['_id'], docs['name'], function (docs){
+        res.type('text/json');
+        res.send(JSON.stringify(docs));
+      });
+    });
+  });
+});
+
+
 app.use(function (req, res){
   res.type('text/plain');
   res.status('404');
@@ -180,6 +232,7 @@ app.use(function(err, req, res, next){
   res.status('500');
   res.send('500 - Server Error');
 });
+
 
 app.listen(app.get('port'), function (){
   console.log('Express started on http://localhost:' + app.get('port') + '; press Ctrl-C to terminate.');
