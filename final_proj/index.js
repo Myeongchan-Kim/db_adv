@@ -35,7 +35,7 @@ app.get('/', function (req, res){
     'size' : /GDP \(current US\$\)/,
     'color' :  /Literacy rate, adult total /,
   };
-  res.render('index', {indexObj : index, data:docs});
+  res.render('index', {indexObj : index});
 });
 
 var findValue = function(db, id, callback ){
@@ -129,16 +129,17 @@ var getAllValueOfIndicator = function (collectionName,indicator_id, indicator_na
       if(err) throw err;
       //make new table;
       var id_obj = new ObjectId(indicator_id);
+      var newCollectionName = "_" + indicator_name.replace(/ |\(|\$\)/gi, '');
       db.collection(collectionName).aggregate([
         { $match : { indicator_code : id_obj } },
-        { $out : "_"+indicator_name }
+        { $out : newCollectionName }
       ]).toArray(function (err, docs){
         if(err) throw err;
         var country = db.collection('country');
         country.aggregate([
           {
               $lookup :{
-                from: "_"+indicator_name,
+                from: newCollectionName,
                 localField: "_id",
                 foreignField : "country_code",
                 as :"value"

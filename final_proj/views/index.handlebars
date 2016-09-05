@@ -2,8 +2,8 @@
   <div class="toggleable control_box">
     <div class="year_wrapper">
       <label for="year">year</label>
-      <input type="number" name="year" value="1960" />
-      <button class="year_set">change</button>
+      <input id="year_input" type="number" name="year" value="1960" />
+      <button id="changeButton" class="year_set">change</button>
     </div><!--year_wrapper-->
     <div class="attribute_wrapper">
       {{#each indexObj}}
@@ -16,7 +16,7 @@
         </select>
       </div>
       {{/each}}
-      <button class="attr_set">set</button>
+      <button id="loadData" class="attr_set">set</button>
     </div><!--year_wrapper-->
   </div>
   <div id="screen">
