@@ -12,8 +12,11 @@ var dataset = {
   'minX' : 987654321,
   'minY' : 987654321,
 };
-var selected_country = ["Korea, Rep."];
-
+var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan"];
+var scaleX = d3.scaleLog().domain([20, 80000]).range([0, width]);
+var scaleY = d3.scaleLinear().domain([30, 85]).range([height, 0]);
+var scaleSize = d3.scaleLog().domain([1000, 2000000000]).range([0.1, 30]);
+//var scaleSize = d3.scaleLinear().domain([1000, 2000000000]).range([0.1, 60]);
 
 var init = function (){
   var xhr = new XMLHttpRequest();
@@ -23,16 +26,15 @@ var init = function (){
     dataset['country_name'] = docs.map(function(ele){return ele['country_name'];});
     var svg = d3.select("#screen").append("svg");
     svg.attr("width", width).attr("height", height);
+    //svg.append("g").call(d3.svg.axis())     .scale();
     var elementEnter = svg.selectAll("circle").data(dataset['country_name']).enter();
 
     var labels = elementEnter.append("text");
     labels
-    .attr("dx", 100)
-    .attr("dy", 100)
     .text(function(d){
-      if(selected_country.indexOf(d) >= 0)
+      //if(selected_country.indexOf(d) >= 0) //////////////////////////
         return d;
-      else "";
+      //else "";
     });
 
     var circles = elementEnter.append("circle");
@@ -167,46 +169,42 @@ var make_circle = function (year){
     //console.log(obj['country_name'] + " " +obj['x'] + " " + obj['y']);
     yearData.push(obj);
   }
-  var scaleX = d3.scaleLog().domain([20, 80000]).range([0, width]);
-  var scaleY = d3.scaleLinear().domain([30, 80]).range([height, 0]);
-  var scaleSize = d3.scaleLog().domain([1000, 2000000000]).range([1, 30]);
 
   //change circle
-  console.log(yearData[i]);
   var svg = d3.select("svg");
   var circles = svg.selectAll("circle").transition();
   circles
     .attr("cx", function (d, i){
       if(yearData[i]['x'])
         return scaleX(Number(yearData[i]['x']));
-      else
-        return d['x'];
+      //else
+        //return d['x'];
       })
     .attr("cy", function (d, i){
       if(yearData[i]['y'])
         return scaleY(yearData[i]['y']);
-      else
-        return d['y'];
+      //else
+        //return d['y'];
     })
     .attr("r", function(d,i){
       if(yearData[i]['size'])
         return "" + scaleSize(yearData[i]['size']) +"px";
-      else
-        return d['r'];
+      //else
+        //return d['r'];
     });
   var labels = svg.selectAll("text").transition();
   labels
   .attr("dx", function (d, i){
     if(yearData[i]['x'])
       return scaleX(Number(yearData[i]['x']));
-    else
-      return d['x'];
+    //else
+      //return d['x'];
     })
   .attr("dy", function (d, i){
     if(yearData[i]['y'])
       return scaleY(yearData[i]['y']);
-    else
-      return d['y'];
+    //else
+      //return d['y'];
   })
 }
 
