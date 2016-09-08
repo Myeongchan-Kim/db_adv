@@ -12,7 +12,7 @@ var dataset = {
   'minX' : 987654321,
   'minY' : 987654321,
 };
-var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan"];
+var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba"];
 var scaleX = d3.scaleLog().domain([20, 80000]).range([0, width]);
 var scaleY = d3.scaleLinear().domain([30, 85]).range([height, 0]);
 var scaleSize = d3.scaleLog().domain([1000, 2000000000]).range([0.1, 30]);
@@ -26,15 +26,20 @@ var init = function (){
     dataset['country_name'] = docs.map(function(ele){return ele['country_name'];});
     var svg = d3.select("#screen").append("svg");
     svg.attr("width", width).attr("height", height);
-    //svg.append("g").call(d3.svg.axis())     .scale();
+
+    var xAxis = d3.axisBottom(scaleX).ticks(20, ",.0f");
+    var xAxisSpr = svg.append("g").call(xAxis).attr("transform", "translate(0,10)");
+    var yAxis = d3.axisLeft(scaleY).ticks(20, ",.1f");
+    var yAxisSpr = svg.append("g").call(yAxis).attr("transform", "translate(30,0)");
+
     var elementEnter = svg.selectAll("circle").data(dataset['country_name']).enter();
 
     var labels = elementEnter.append("text");
     labels
     .text(function(d){
-      //if(selected_country.indexOf(d) >= 0) //////////////////////////
+      if(selected_country.indexOf(d) >= 0) //////////////////////////
         return d;
-      //else "";
+      else "";
     });
 
     var circles = elementEnter.append("circle");
