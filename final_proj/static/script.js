@@ -1,5 +1,7 @@
 var width = 900;
 var height = 600;
+var xPadding = 30;
+var yPadding = 20;
 var callNum = 3;
 var dataset = {
   'country_name' : [],
@@ -12,10 +14,11 @@ var dataset = {
   'minX' : 987654321,
   'minY' : 987654321,
 };
-var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba"];
-var scaleX = d3.scaleLog().domain([20, 80000]).range([0, width]);
-var scaleY = d3.scaleLinear().domain([30, 85]).range([height, 0]);
-var scaleSize = d3.scaleLog().domain([1000, 2000000000]).range([0.1, 30]);
+var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba", "China"];
+var hidden_country = ["World", "Middle income", "Low & middle income", "Lower middle income"];
+var scaleX = d3.scaleLog().domain([20, 80000]).range([xPadding, width-xPadding]);
+var scaleY = d3.scaleLinear().domain([30, 85]).range([height - yPadding, yPadding]);
+var scaleSize = d3.scaleSqrt().domain([1000, 2000000000]).range([5, 50]);
 //var scaleSize = d3.scaleLinear().domain([1000, 2000000000]).range([0.1, 60]);
 
 var init = function (){
@@ -24,23 +27,16 @@ var init = function (){
   xhr.addEventListener("load", function (e){
     var docs  = JSON.parse(xhr.responseText);
     dataset['country_name'] = docs.map(function(ele){return ele['country_name'];});
+
     var svg = d3.select("#screen").append("svg");
     svg.attr("width", width).attr("height", height);
 
     var xAxis = d3.axisBottom(scaleX).ticks(20, ",.0f");
-    var xAxisSpr = svg.append("g").call(xAxis).attr("transform", "translate(0,10)");
+    var xAxisSpr = svg.append("g").call(xAxis).attr("transform", "translate(0,"+(height - yPadding)+")");
     var yAxis = d3.axisLeft(scaleY).ticks(20, ",.1f");
-    var yAxisSpr = svg.append("g").call(yAxis).attr("transform", "translate(30,0)");
+    var yAxisSpr = svg.append("g").call(yAxis).attr("transform", "translate("+(xPadding)+",0)");
 
     var elementEnter = svg.selectAll("circle").data(dataset['country_name']).enter();
-
-    var labels = elementEnter.append("text");
-    labels
-    .text(function(d){
-      if(selected_country.indexOf(d) >= 0) //////////////////////////
-        return d;
-      else "";
-    });
 
     var circles = elementEnter.append("circle");
     circles.text(function(d){return d;})
@@ -54,11 +50,29 @@ var init = function (){
       +0.6+")";
     })
     .attr("stroke", "orange")
-    .attr("stroke-width", "2px");
+    .attr("stroke-width", "2px")
+    .attr("opacity", filterGroup);
 
-  });
+    var labels = elementEnter.append("text");
+    labels.text(function(d){
+      //if(selected_country.indexOf(d) >= 0)
+        return d;
+      //else "";
+    })
+    .attr("opacity", filterGroup); //labels
+
+  }); //xhr
   xhr.send(null);
-}
+} // init
+
+var filterGroup = function(d,i){
+  if(hidden_country.indexOf(dataset['country_name'][i]) >= 0 ||
+    dataset['country_name'].includes("&") ||
+    dataset['country_name'].includes("income"))
+    return 0;
+  else
+    return d;
+};
 
 var click_event = function (e){
   //console.log(e.target.tagName);
@@ -114,7 +128,7 @@ var click_event = function (e){
     xhr3.send(null);
   }
   if(e.target.tagName == "circle"){
-    //console.log("circle!!");
+    //e.target.style("display:hidden");
   }
 }
 
@@ -182,36 +196,37 @@ var make_circle = function (year){
     .attr("cx", function (d, i){
       if(yearData[i]['x'])
         return scaleX(Number(yearData[i]['x']));
-      //else
-        //return d['x'];
+      else
+        return d['x'];
       })
     .attr("cy", function (d, i){
       if(yearData[i]['y'])
         return scaleY(yearData[i]['y']);
-      //else
-        //return d['y'];
+      else
+        return d['y'];
     })
     .attr("r", function(d,i){
       if(yearData[i]['size'])
         return "" + scaleSize(yearData[i]['size']) +"px";
-      //else
-        //return d['r'];
+      else
+        return d['r'];
     });
-  var labels = svg.selectAll("text").transition();
+
+  var labels = svg.selectAll("svg>text").transition();
   labels
   .attr("dx", function (d, i){
     if(yearData[i]['x'])
       return scaleX(Number(yearData[i]['x']));
-    //else
-      //return d['x'];
+    else
+      return d['x'];
     })
   .attr("dy", function (d, i){
     if(yearData[i]['y'])
       return scaleY(yearData[i]['y']);
-    //else
-      //return d['y'];
+    else
+      return d['y'];
   })
-}
+};
 
 var make_random_circle = function (dataset){
   //console.log(dataset);
