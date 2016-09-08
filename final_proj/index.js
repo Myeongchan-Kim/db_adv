@@ -123,43 +123,37 @@ var findAllCountry = function (callback){
   }); //mongo connect
 };
 
-var getAllValueOfIndicator = function (collectionName,indicator_id, indicator_name,callback){
-  MongoClient.connect(url, function(err, db){
-    db.authenticate(mongoID, mongoPW, function (err, res){
+var getAllValueOfIndicator = function (db, collectionName,indicator_id, indicator_name,callback){
+    var id_obj = new ObjectId(indicator_id);
+    var newCollectionName = "_" + indicator_name.replace(/ |\(|\$\)/gi, '');
+    db.collection(collectionName).aggregate([
+      { $match : { indicator_code : id_obj } },
+      { $out : newCollectionName }
+    ]).toArray(function (err, docs){
       if(err) throw err;
-      //make new table;
-      var id_obj = new ObjectId(indicator_id);
-      var newCollectionName = "_" + indicator_name.replace(/ |\(|\$\)/gi, '');
-      db.collection(collectionName).aggregate([
-        { $match : { indicator_code : id_obj } },
-        { $out : newCollectionName }
-      ]).toArray(function (err, docs){
-        if(err) throw err;
-        var country = db.collection('country');
-        country.aggregate([
-          {
-              $lookup :{
-                from: newCollectionName,
-                localField: "_id",
-                foreignField : "country_code",
-                as :"value"
-              }
-          },
-          {
-              $project :{
-                  country_name : 1,
-                  value :{
-                      year : 1,
-                      value : 1
-                  }
-              }
-          }
-        ]).toArray(function(err, docs){
-          callback(docs);
-        });
+      var country = db.collection('country');
+      country.aggregate([
+        {
+            $lookup :{
+              from: newCollectionName,
+              localField: "_id",
+              foreignField : "country_code",
+              as :"value"
+            }
+        },
+        {
+            $project :{
+                country_name : 1,
+                value :{
+                    year : 1,
+                    value : 1
+                }
+            }
+        }
+      ]).toArray(function(err, docs){
+        callback(docs);
       });
-    }); // auth
-  }); //mongo connect
+    }); // $out new temp collection
 }
 
 var loadIndicator = function (category, callback){
@@ -212,7 +206,7 @@ app.get('/indicator/:category/:indicator_name', function(req, res){
     //console.log(collection);
     var condition = {'name' : {$regex : new RegExp(req.params.indicator_name)} };
     collection.findOne(condition, function (err, docs){
-      getAllValueOfIndicator(req.params.category, docs['_id'], docs['name'], function (docs){
+      getAllValueOfIndicator(db, req.params.category, docs['_id'], docs['name'], function (docs){
         res.type('text/json');
         res.send(JSON.stringify(docs));
       });
