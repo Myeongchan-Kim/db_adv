@@ -23,7 +23,7 @@ var scaleSize = d3.scaleSqrt().domain([1000, 2000000000]).range([5, 50]);
 
 var init = function (){
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'http://localhost:3000/all-country', true);
+  xhr.open('GET', window.location.origin + '/all-country', true);
   xhr.addEventListener("load", function (e){
     var docs  = JSON.parse(xhr.responseText);
     dataset['country_name'] = docs.map(function(ele){return ele['country_name'];});
@@ -55,9 +55,9 @@ var init = function (){
 
     var labels = elementEnter.append("text");
     labels.text(function(d){
-      //if(selected_country.indexOf(d) >= 0)
+      if(selected_country.indexOf(d) >= 0)
         return d;
-      //else "";
+      else "";
     })
     .attr("opacity", filterGroup); //labels
 
@@ -93,7 +93,7 @@ var click_event = function (e){
   if(e.target.tagName == "BUTTON" && e.target.id === "loadData"){
     console.log("Load Data");
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'http://localhost:3000/indicator/economy_growth/GDP%20per%20capita%20%5C(current%20US%5C%24%5C)', true);
+    xhr.open('GET', window.location.origin + '/indicator/economy_growth/GDP%20per%20capita%20%5C(current%20US%5C%24%5C)', true);
     xhr.addEventListener("load", function (e){
       var docs  = JSON.parse(xhr.responseText);
       console.log("GDP-per-capita Load");
@@ -105,7 +105,7 @@ var click_event = function (e){
 
     //life_expect
     var xhr2 = new XMLHttpRequest();
-    xhr2.open('GET', 'http://localhost:3000/indicator/health/Life%20expectancy%20at%20birth,%20total', true);
+    xhr2.open('GET', window.location.origin + '/indicator/health/Life%20expectancy%20at%20birth,%20total', true);
     xhr2.addEventListener("load", function (e){
       var docs  = JSON.parse(xhr2.responseText);
       console.log("life_expect Load");
@@ -117,7 +117,7 @@ var click_event = function (e){
 
     //life_expect
     var xhr3 = new XMLHttpRequest();
-    xhr3.open('GET', 'http://localhost:3000/indicator/health/Population%2C%20total', true);
+    xhr3.open('GET', window.location.origin + '/indicator/health/Population%2C%20total', true);
     xhr3.addEventListener("load", function (e){
       var docs  = JSON.parse(xhr3.responseText);
       console.log("Population Load");
