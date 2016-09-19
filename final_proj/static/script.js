@@ -57,14 +57,13 @@ var init = function (){
 
     var labels = elementEnter.append("text");
     labels.text(filterLabel);
-    //.attr("opacity", filterLabel); //labels
 
   }); //xhr
   xhr.send(null);
 } // init
 
 var toggleLabelList = function(d, i){
-  selectedIdList[i] = true;
+  selectedIdList[i] = !selectedIdList[i];
   var svg = d3.select("#screen svg");
   var labels = svg.selectAll("svg>text")
   .text(function(d, i){
@@ -76,7 +75,6 @@ var toggleLabelList = function(d, i){
 }
 
 var filterGroup = function(d,i){
-  selectedIdList[i] = false;
   if(dataset['country_name'][i].includes("&") ||
     dataset['country_name'][i].includes("countries") ||
     dataset['country_name'][i].includes("World") ||
@@ -87,10 +85,16 @@ var filterGroup = function(d,i){
 };
 
 var filterLabel = function(d, i){
-  if(selectedIdList[i] == true)
-    return d;
+  if(selected_country.indexOf(dataset['country_name'][i]) >= 0)
+  {
+    selectedIdList[i] = true;
+    return dataset['country_name'][i];
+  }
   else
+  {
+    selectedIdList[i] = false;
     return "";
+  }
 }
 
 var click_event = function (e){
