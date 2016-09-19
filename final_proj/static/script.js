@@ -3,6 +3,7 @@ var height = 600;
 var xPadding = 30;
 var yPadding = 20;
 var callNum = 3;
+var trasitionTime = 1000;
 var dataset = {
   'country_name' : [],
   'x' : [],
@@ -15,7 +16,6 @@ var dataset = {
   'minY' : 987654321,
 };
 var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba", "China"];
-//var hidden_country = ["World", "Middle income", "Low & middle income", "Lower middle income"];
 var selectedIdList = {};
 var scaleX = d3.scaleLog().domain([20, 80000]).range([xPadding, width-xPadding]);
 var scaleY = d3.scaleLinear().domain([30, 85]).range([height - yPadding, yPadding]);
@@ -78,6 +78,7 @@ var filterGroup = function(d,i){
   if(dataset['country_name'][i].includes("&") ||
     dataset['country_name'][i].includes("countries") ||
     dataset['country_name'][i].includes("World") ||
+    dataset['country_name'][i].includes("Asia") ||
     dataset['country_name'][i].includes("income"))
     return "none";
   else
@@ -169,7 +170,7 @@ var load_population = function(data){
 
 var changeCircleRandom = function(){
   var svg = d3.select("svg");
-  var circles = svg.selectAll("circle").transition()
+  var circles = svg.selectAll("circle").transition().duration(trasitionTime)
   .attr("cx", function (d){return Math.random() * width; })
   .attr("cy", function (d){return Math.random() * height; });
 }
@@ -214,7 +215,7 @@ var make_circle = function (year){
 
   //change circle
   var svg = d3.select("svg");
-  var circles = svg.selectAll("circle").transition();
+  var circles = svg.selectAll("circle").transition().duration(trasitionTime);
   circles
     .attr("cx", function (d, i){
       if(yearData[i]['x'])
@@ -235,7 +236,7 @@ var make_circle = function (year){
         return d['r'];
     });
 
-  var labels = svg.selectAll("svg>text").transition();
+  var labels = svg.selectAll("svg>text").transition().duration(trasitionTime);
   labels
   .attr("dx", function (d, i){
     if(yearData[i]['x'])
