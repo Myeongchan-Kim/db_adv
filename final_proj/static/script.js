@@ -15,7 +15,8 @@ var dataset = {
   'minY' : 987654321,
 };
 var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba", "China"];
-var hidden_country = ["World", "Middle income", "Low & middle income", "Lower middle income"];
+//var hidden_country = ["World", "Middle income", "Low & middle income", "Lower middle income"];
+var selectedIdList = {};
 var scaleX = d3.scaleLog().domain([20, 80000]).range([xPadding, width-xPadding]);
 var scaleY = d3.scaleLinear().domain([30, 85]).range([height - yPadding, yPadding]);
 var scaleSize = d3.scaleSqrt().domain([1000, 2000000000]).range([5, 50]);
@@ -51,28 +52,46 @@ var init = function (){
     })
     .attr("stroke", "orange")
     .attr("stroke-width", "2px")
-    .attr("opacity", filterGroup);
+    .attr("display", filterGroup)
+    .on("click", toggleLabelList);
 
     var labels = elementEnter.append("text");
-    labels.text(function(d){
-      if(selected_country.indexOf(d) >= 0)
-        return d;
-      else "";
-    })
-    .attr("opacity", filterGroup); //labels
+    labels.text(filterLabel);
+    //.attr("opacity", filterLabel); //labels
 
   }); //xhr
   xhr.send(null);
 } // init
 
+var toggleLabelList = function(d, i){
+  selectedIdList[i] = true;
+  var svg = d3.select("#screen svg");
+  var labels = svg.selectAll("svg>text")
+  .text(function(d, i){
+    if(selectedIdList[i])
+      return dataset['country_name'][i];
+    else
+      return "";
+  });
+}
+
 var filterGroup = function(d,i){
-  if(hidden_country.indexOf(dataset['country_name'][i]) >= 0 ||
-    dataset['country_name'].includes("&") ||
-    dataset['country_name'].includes("income"))
-    return 0;
+  selectedIdList[i] = false;
+  if(dataset['country_name'][i].includes("&") ||
+    dataset['country_name'][i].includes("countries") ||
+    dataset['country_name'][i].includes("World") ||
+    dataset['country_name'][i].includes("income"))
+    return "none";
   else
     return d;
 };
+
+var filterLabel = function(d, i){
+  if(selectedIdList[i] == true)
+    return d;
+  else
+    return "";
+}
 
 var click_event = function (e){
   //console.log(e.target.tagName);
