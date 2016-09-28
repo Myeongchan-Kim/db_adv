@@ -56,7 +56,9 @@ var init = function (){
     .on("click", toggleLabelList);
 
     var labels = elementEnter.append("text");
-    labels.text(filterLabel);
+    labels.text(filterLabel)
+    .on("click", toggleLabelList)
+    ;
 
   }); //xhr
   xhr.send(null);
