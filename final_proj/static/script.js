@@ -50,8 +50,8 @@ var init = function (){
       +Math.floor(Math.random()*255)+","
       +0.6+")";
     })
-    .attr("stroke", "orange")
-    .attr("stroke-width", "2px")
+    //.attr("stroke", "orange")
+    //.attr("stroke-width", "2px")
     .attr("display", filterGroup)
     .on("click", toggleLabelList);
 
@@ -247,9 +247,7 @@ var make_random_circle = function (dataset){
       return "rgb("+Math.floor(Math.random()*255)+","
       +Math.floor(Math.random()*255)+","
       +Math.floor(Math.random()*255)+")";
-    })
-    .attr("stroke", "orange")
-    .attr("stroke-width", "3px");
+    });
 
   var labels = svg.selectAll("text").data(dataset).enter().append("text");
   labels.text(function(d){ return d['country_name'];})
