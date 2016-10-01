@@ -116,14 +116,16 @@ var click_event = function (e){
         clearInterval(itervalEvent)};
     }, 1200);
   }
+
   if(e.target.tagName == "BUTTON" && e.target.id === "loadData"){
     console.log("Load Data");
+
     var xhr = new XMLHttpRequest();
     xhr.open('GET', window.location.origin + '/indicator/economy_growth/GDP%20per%20capita%20%5C(current%20US%5C%24%5C)', true);
     xhr.addEventListener("load", function (e){
       var docs  = JSON.parse(xhr.responseText);
       console.log("GDP-per-capita Load");
-      load_gdbPerCapita(docs);
+      set_data('x', docs);
       callNum -= 1;
       if(callNum == 0) changeCicle();
     });
@@ -135,7 +137,7 @@ var click_event = function (e){
     xhr2.addEventListener("load", function (e){
       var docs  = JSON.parse(xhr2.responseText);
       console.log("life_expect Load");
-      load_life_expect(docs);
+      set_data('y', docs);
       callNum -= 1;
       if(callNum == 0) changeCicle();
     });
@@ -147,7 +149,7 @@ var click_event = function (e){
     xhr3.addEventListener("load", function (e){
       var docs  = JSON.parse(xhr3.responseText);
       console.log("Population Load");
-      load_population(docs);
+      set_data('size', docs);
       callNum -= 1;
       if(callNum == 0) changeCicle();
     });
@@ -158,17 +160,10 @@ var click_event = function (e){
   }
 }
 
-var load_gdbPerCapita = function(data){
-  dataset['x'] = data.map(function(ele){return ele['value'];});
+var set_data = function( index, data)
+{
+  dataset[index] = data.map(function(ele){return ele['value'];});
 }
-
-var load_life_expect = function(data){
-  dataset['y'] = data.map(function(ele){return ele['value'];});
-};
-
-var load_population = function(data){
-  dataset['size'] = data.map(function(ele){return ele['value'];});
-};
 
 var changeCircleRandom = function(){
   var svg = d3.select("svg");
