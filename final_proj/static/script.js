@@ -2,7 +2,7 @@ var width = 900;
 var height = 600;
 var xPadding = 30;
 var yPadding = 20;
-var callNum = 3;
+var num_attr = 3;
 var trasitionTime = 1000;
 var dataset = {
   'country_name' : [],
@@ -106,13 +106,11 @@ var xhrReq = function ( attribute, address, callback){
   //var address = '/indicator/economy_growth/GDP%20per%20capita%20%5C(current%20US%5C%24%5C)'
   xhr.open('GET', window.location.origin + address, true);
   xhr.addEventListener("load", function (e){
-    console.log(address);
-
     var docs  = JSON.parse(xhr.responseText);
     callback(attribute, docs);
 
-    callNum -= 1;
-    if(callNum == 0) changeCicle();
+    num_attr -= 1;
+    if(num_attr == 0) changeCicle();
   });
   xhr.send(null);
 }
@@ -138,10 +136,15 @@ var click_event = function (e){
   if(e.target.tagName == "BUTTON" && e.target.id === "loadData"){
     console.log("Load Data");
 
-    callNum = 3;
-    xhrReq('x','/indicator/economy_growth/GDP%20per%20capita%20%5C(current%20US%5C%24%5C)', set_data);
-    xhrReq('y','/indicator/health/Life%20expectancy%20at%20birth,%20total', set_data);
-    xhrReq('size','/indicator/health/Population%2C%20total', set_data);
+    num_attr = 3;
+    var attr_list = document.querySelectorAll("div.index_div");
+    for(var i = 0; i < num_attr; i++)
+    {
+      var groupName = attr_list[i].dataset.group + "/";
+      var addr = encodeURI('/indicator/' + groupName + attr_list[i].dataset.val);
+      console.log(addr);
+      xhrReq(attr_list[i].dataset.attrName, addr, set_data);
+    }
   }
 }
 

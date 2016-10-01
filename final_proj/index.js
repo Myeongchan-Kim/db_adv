@@ -29,13 +29,25 @@ app.set('view engine', 'handlebars');
 app.set('port', process.env.PORT || 3000);
 
 app.get('/', function (req, res){
-  var index = {
-    'x' : /Life expectancy at birth, total \(years\)/,
-    'y' : /GDP per capita \(current US\$\)/,
-    'size' : /Population, total/,
-    'color' :  /Literacy rate, adult total /,
+  var default_index = {
+    'x' : {
+      group : "economy_growth",
+      indicator_name : "GDP per capita (current US$)"
+    },
+    'y' : {
+      group : "health",
+      indicator_name : "Life expectancy at birth, total (years)"
+    },
+    'size' : {
+      group : "health",
+      indicator_name : "Population, total"
+    },
+    'bright' :  {
+      group : "education",
+      indicator_name :  "Literacy rate, adult total ",
+    },
   };
-  res.render('index', {indexObj : index});
+  res.render('index', {indexObj : default_index});
 });
 
 var findValue = function(db, id, callback ){
@@ -203,9 +215,12 @@ app.get('/indicator/:category', function(req, res){
 app.get('/indicator/:category/:indicator_name', function(req, res){
   MongoClient.connect(url, function(err, db){
     var collection = db.collection('indicator');
-    //console.log(collection);
-    var condition = {'name' : {$regex : new RegExp(req.params.indicator_name)} };
+    var str = req.params.indicator_name.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+    console.log(str);
+    var condition = {'name' : {$regex : new RegExp(str)} };
     collection.findOne(condition, function (err, docs){
+      if(err) throw err;
+      //console.log(docs);
       getAllValueOfIndicator(db, req.params.category, docs['_id'], docs['name'], function (docs){
         res.type('text/json');
         res.send(JSON.stringify(docs));
