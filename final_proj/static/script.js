@@ -100,11 +100,29 @@ var filterLabel = function(d, i){
   }
 }
 
+var xhrReq = function ( attribute, address, callback){
+
+  var xhr = new XMLHttpRequest();
+  //var address = '/indicator/economy_growth/GDP%20per%20capita%20%5C(current%20US%5C%24%5C)'
+  xhr.open('GET', window.location.origin + address, true);
+  xhr.addEventListener("load", function (e){
+    console.log(address);
+
+    var docs  = JSON.parse(xhr.responseText);
+    callback(attribute, docs);
+
+    callNum -= 1;
+    if(callNum == 0) changeCicle();
+  });
+  xhr.send(null);
+}
+
 var click_event = function (e){
   //console.log(e.target.tagName);
   if(e.target.tagName == "BUTTON" && e.target.id === "changeButton"){
     changeCicle();
   }
+
   if(e.target.tagName == "BUTTON" && e.target.id === "playButton"){
     var itervalEvent = setInterval(function(){
       var year = document.getElementById("year_input");
@@ -120,43 +138,10 @@ var click_event = function (e){
   if(e.target.tagName == "BUTTON" && e.target.id === "loadData"){
     console.log("Load Data");
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', window.location.origin + '/indicator/economy_growth/GDP%20per%20capita%20%5C(current%20US%5C%24%5C)', true);
-    xhr.addEventListener("load", function (e){
-      var docs  = JSON.parse(xhr.responseText);
-      console.log("GDP-per-capita Load");
-      set_data('x', docs);
-      callNum -= 1;
-      if(callNum == 0) changeCicle();
-    });
-    xhr.send(null);
-
-    //life_expect
-    var xhr2 = new XMLHttpRequest();
-    xhr2.open('GET', window.location.origin + '/indicator/health/Life%20expectancy%20at%20birth,%20total', true);
-    xhr2.addEventListener("load", function (e){
-      var docs  = JSON.parse(xhr2.responseText);
-      console.log("life_expect Load");
-      set_data('y', docs);
-      callNum -= 1;
-      if(callNum == 0) changeCicle();
-    });
-    xhr2.send(null);
-
-    //life_expect
-    var xhr3 = new XMLHttpRequest();
-    xhr3.open('GET', window.location.origin + '/indicator/health/Population%2C%20total', true);
-    xhr3.addEventListener("load", function (e){
-      var docs  = JSON.parse(xhr3.responseText);
-      console.log("Population Load");
-      set_data('size', docs);
-      callNum -= 1;
-      if(callNum == 0) changeCicle();
-    });
-    xhr3.send(null);
-  }
-  if(e.target.tagName == "circle"){
-    //e.target.style("display:hidden");
+    callNum = 3;
+    xhrReq('x','/indicator/economy_growth/GDP%20per%20capita%20%5C(current%20US%5C%24%5C)', set_data);
+    xhrReq('y','/indicator/health/Life%20expectancy%20at%20birth,%20total', set_data);
+    xhrReq('size','/indicator/health/Population%2C%20total', set_data);
   }
 }
 
