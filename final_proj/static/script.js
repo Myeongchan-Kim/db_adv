@@ -45,10 +45,10 @@ var init = function (){
     .attr("cy", height)
     .attr("r", "2px")
     .attr("fill", function (d, i){
-      return "rgba("+Math.floor(Math.random()*255)+","
-      +Math.floor(Math.random()*255)+","
-      +Math.floor(Math.random()*255)+","
-      +0.6+")";
+      var red = Math.floor(Math.random()*255);
+      var green =Math.floor(Math.random()*255);
+      var blue = Math.floor(255*3/2) - red - green;
+      return "rgba("+red+","+green+","+blue+","+0.6+")";
     })
     //.attr("stroke", "orange")
     //.attr("stroke-width", "2px")
@@ -132,9 +132,11 @@ var click_event = function (e){
         clearInterval(playEvent)
       };
     }, 1200);
+    console.log("start:"+playEvent);
   }
 
   if(e.target.tagName == "BUTTON" && e.target.id === "stopButton"){
+    console.log("stop:"+playEvent);
     clearInterval(playEvent);
   }
 
@@ -153,17 +155,10 @@ var click_event = function (e){
   }
 }
 
-var set_data = function( index, data)
-{
+var set_data = function( index, data){
   dataset[index] = data.map(function(ele){return ele['value'];});
 }
 
-var changeCircleRandom = function(){
-  var svg = d3.select("svg");
-  var circles = svg.selectAll("circle").transition().duration(trasitionTime)
-  .attr("cx", function (d){return Math.random() * width; })
-  .attr("cy", function (d){return Math.random() * height; });
-}
 
 var changeCicle = function(){
   var year = document.getElementById("year_input");
