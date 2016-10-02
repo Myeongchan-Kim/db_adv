@@ -20,7 +20,7 @@ var selectedIdList = {};
 var scaleX = d3.scaleLog().domain([20, 80000]).range([xPadding, width-xPadding]);
 var scaleY = d3.scaleLinear().domain([30, 85]).range([height - yPadding, yPadding]);
 var scaleSize = d3.scaleSqrt().domain([1000, 2000000000]).range([5, 50]);
-//var scaleSize = d3.scaleLinear().domain([1000, 2000000000]).range([0.1, 60]);
+var playEvent = {};
 
 var init = function (){
   var xhr = new XMLHttpRequest();
@@ -122,15 +122,20 @@ var click_event = function (e){
   }
 
   if(e.target.tagName == "BUTTON" && e.target.id === "playButton"){
-    var itervalEvent = setInterval(function(){
+    playEvent = setInterval(function(){
       var year = document.getElementById("year_input");
       year.value = Number(year.value) + 1;
       changeCicle();
       if(year.value >= 2014) {
         var year = document.getElementById("year_input");
         year.value = 1960;
-        clearInterval(itervalEvent)};
+        clearInterval(playEvent)
+      };
     }, 1200);
+  }
+
+  if(e.target.tagName == "BUTTON" && e.target.id === "stopButton"){
+    clearInterval(playEvent);
   }
 
   if(e.target.tagName == "BUTTON" && e.target.id === "loadData"){
@@ -236,28 +241,6 @@ var make_circle = function (year){
       return d['y'];
   })
 };
-
-var make_random_circle = function (dataset){
-  //console.log(dataset);
-  var svg = d3.select("#screen").append("svg");
-  svg.attr("width", width).attr("height", height);
-  var circles = svg.selectAll("circle").data(dataset).enter().append("circle");
-  circles
-    .attr("cx", function (d, i){return Math.random() * width; })
-    .attr("cy", function (d, i){return Math.random() * height;})
-    .attr("r", "20px")
-    .attr("fill", function (d, i){
-      return "rgb("+Math.floor(Math.random()*255)+","
-      +Math.floor(Math.random()*255)+","
-      +Math.floor(Math.random()*255)+")";
-    });
-
-  var labels = svg.selectAll("text").data(dataset).enter().append("text");
-  labels.text(function(d){ return d['country_name'];})
-    .attr("x", function(d){ return Math.random() * width;})
-    .attr("y", function (d, i){ return Math.random() * height;});
-    ;
-}
 
 document.addEventListener("click", click_event);
 init();
