@@ -3,13 +3,14 @@
     <div class="attribute_wrapper">
       {{#each indexObj}}
       <div class="index_div" data-attr-name="{{@key}}" data-group = "{{this.group}}" data-val="{{this.indicator_name}}">
-        <label for="{{@key}}_attr">{{@key}}</label>
-        <!-- <select id="{{@key}}_attr">
-          <option value="{{this}}">
-            {{this}}
-          </option>
-        </select> -->
-        <input type=text class="attr_input" id="{{@key}}_attr" value="{{this.indicator_name}}" readonly />
+        <label for="{{@key}}_attr">{{@key}}</label><input type=text class="attr_input" id="{{@key}}_attr" value="{{this.indicator_name}}" readonly />
+        <label for="{{@key}}_scale_type">scale</label><select id="{{@key}}_scale_type" name="scale_type">
+          <option value="linear">linear</option>
+          <option value="log">log</option>
+          <option value="sqrt">sqrt</option>
+        </select>
+        <label for="{{@key}}_min" class="range min_range">min</label><input type=number class="range min_range" id="{{@key}}_min" value="{{this}}" />
+        <label for="{{@key}}_max" class="range max_range">max</label><input type=number class="range max_range" id="{{@key}}_max" value="{{this}}" />
       </div>
       {{/each}}
       <button id="loadData" class="attr_set">set</button>

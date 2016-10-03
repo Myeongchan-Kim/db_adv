@@ -11,21 +11,43 @@
   background-color: #EEEEFF;
 }
 
-input.attr_input{
-  width:120px;
-}
-
 div.control_box{
   width:900px;
-  height:55px;
   background-color : gray;
+  padding-top:10px;
+  padding-bottom: 10px;
+}
+
+button#loadData{
+  width:80px;
+  height:20px;
+  margin-left:10px;
+  margin-bottom: 20px;
 }
 
 div.index_div{
   float :left;
   margin-right : 20px;
-  width: 180px;
+  margin-top :5px;
+  margin-bottom: 5px;
+  width: 100%;
   overflow:hidden;
+}
+
+div.index_div input{
+  width:120px;
+}
+
+
+div.index_div label{
+  margin-left: 10px;
+  display: inline-block;
+  width:40px;
+}
+
+div.index_div label.range{
+  margin-left:0px;
+  width:30px;
 }
 
 div.index_div select{

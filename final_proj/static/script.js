@@ -50,8 +50,6 @@ var init = function (){
       var blue = Math.floor(255*3/2) - red - green;
       return "rgba("+red+","+green+","+blue+","+0.6+")";
     })
-    //.attr("stroke", "orange")
-    //.attr("stroke-width", "2px")
     .attr("display", filterGroup)
     .on("click", toggleLabelList);
 
@@ -145,8 +143,7 @@ var click_event = function (e){
 
     num_attr = 3;
     var attr_list = document.querySelectorAll("div.index_div");
-    for(var i = 0; i < num_attr; i++)
-    {
+    for(var i = 0; i < num_attr; i++){
       var groupName = attr_list[i].dataset.group + "/";
       var addr = encodeURI('/indicator/' + groupName + attr_list[i].dataset.val);
       console.log(addr);
