@@ -4,6 +4,11 @@ var xPadding = 30;
 var yPadding = 20;
 var num_attr = 3;
 var trasitionTime = 1000;
+var layout = {
+  'x' : [xPadding, width-xPadding],
+  'y' : [height - yPadding, yPadding],
+  'size' : [5, 50],
+}
 var dataset = {
   'country_name' : [],
   'x' : [],
@@ -11,17 +16,13 @@ var dataset = {
   'size' :[],
   'color' :[],
   'scale' :{
-    'x': d3.scaleLog().domain([20, 80000]).range([xPadding, width-xPadding]),
-    'y': d3.scaleLinear().domain([30, 85]).range([height - yPadding, yPadding]),
-    'size' : d3.scaleSqrt().domain([1000, 2000000000]).range([5, 50]),
+    'x': d3.scaleLog().domain([20, 80000]).range(layout['x']),
+    'y': d3.scaleLinear().domain([30, 85]).range(layout['y']),
+    'size' : d3.scaleSqrt().domain([1000, 2000000000]).range(layout['size']),
   },
 };
 var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba", "China"];
 var selectedIdList = {};
-
-// var scaleX = d3.scaleLog().domain([20, 80000]).range([xPadding, width-xPadding]);
-// var scaleY = d3.scaleLinear().domain([30, 85]).range([height - yPadding, yPadding]);
-// var scaleSize = d3.scaleSqrt().domain([1000, 2000000000]).range([5, 50]);
 var playEvent = {};
 
 var init = function (){
@@ -35,9 +36,9 @@ var init = function (){
     svg.attr("width", width).attr("height", height);
 
     var xAxis = d3.axisBottom(dataset.scale['x']).ticks(20, ",.0f");
-    var xAxisSpr = svg.append("g").call(xAxis).attr("transform", "translate(0,"+(height - yPadding)+")");
+    var xAxisSpr = svg.append("g").call(xAxis).attr("class", "x axis").attr("transform", "translate(0,"+(height - yPadding)+")");
     var yAxis = d3.axisLeft(dataset.scale['y']).ticks(20, ",.1f");
-    var yAxisSpr = svg.append("g").call(yAxis).attr("transform", "translate("+(xPadding)+",0)");
+    var yAxisSpr = svg.append("g").call(yAxis).attr("class", "y axis").attr("transform", "translate("+(xPadding)+",0)");
 
     var elementEnter = svg.selectAll("circle").data(dataset['country_name']).enter();
 
@@ -156,22 +157,44 @@ var click_event = function (e){
 
 var set_data = function( index, data){
   dataset[index] = data.map(function(ele){return ele['value'];});
-  //console.log(JSON.stringify(dataset[index][0]));
   var max = d3.max(dataset[index], function(d){
-    //console.log(JSON.stringify(d));
     return d3.max(d, function (row){return Number(row.value);});
   });
-  console.log("max:"+ max);
   var min = d3.min(dataset[index], function(d){
-    //console.log(JSON.stringify(d));
     return d3.min(d, function (row){return Number(row.value);});
   });
+  console.log("max:"+ max);
   console.log("min:"+ min);
+
+  applyScale(index, min, max);
+  applyAxis();
+}
+
+var applyAxis = function(){
+    var svg = d3.select("#screen svg");
+    var xAxis = d3.axisBottom(dataset.scale['x']).ticks(20, ",.0f");
+    var xAxisSpr = svg.selectAll("g.x.axis").call(xAxis).attr("transform", "translate(0,"+(height - yPadding)+")");
+    var yAxis = d3.axisLeft(dataset.scale['y']).ticks(20, ",.1f");
+    var yAxisSpr = svg.selectAll("g.y.axis").call(yAxis).attr("transform", "translate("+(xPadding)+",0)");
+}
+
+var applyScale = function(index, min, max){
   var max_input = document.querySelector("#"+index+"_max_input");
   max_input.value = max;
   var min_input = document.querySelector("#"+index+"_min_input");
   min_input.value = min;
 
+  var selectEle = document.getElementById(index+"_scale_type");
+  var scale_type = selectEle.options[selectEle.selectedIndex].value;
+  console.log(scale_type);
+  if(scale_type == "linear")
+    dataset.scale[index] = d3.scaleLinear().domain([min, max]).range(layout[index]);
+  else if(scale_type == "log")
+    dataset.scale[index] = d3.scaleLog().domain([min, max]).range(layout[index]);
+  else if(scale_type == "sqrt")
+    dataset.scale[index] = d3.scaleSqrt().domain([min, max]).range(layout[index]);
+  else
+    console.log("scale not found");
 }
 
 
