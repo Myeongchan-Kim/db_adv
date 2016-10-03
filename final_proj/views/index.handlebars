@@ -11,10 +11,10 @@
         </select>
         <label for="{{@key}}_min" class="{{@key}} range min_range">min</label><input type=number class="range min_range" id="{{@key}}_min_input" value="{{this.min}}" />
         <label for="{{@key}}_max" class="{{@key}} range max_range">max</label><input type=number class="range max_range" id="{{@key}}_max_input" value="{{this.max}}" />
-        <button name="{{@key}}_apply" class="{{@key}}">apply</button>
+        <button name="{{@key}}_apply" class="{{@key}} apply" id="{{@key}}_apply_button">apply</button>
       </div>
       {{/each}}
-      <button id="loadData" class="attr_set">set</button>
+      <button id="loadData" class="attr_set">Load Data</button>
     </div><!--attribute_wrapper-->
     <div class="year_wrapper">
       <label for="year">year</label>

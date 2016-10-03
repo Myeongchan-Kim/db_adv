@@ -153,6 +153,19 @@ var click_event = function (e){
       xhrReq(attr_list[i].dataset.attrName, addr, set_data);
     }
   }
+
+  var postpix_apply_button = "_apply_button";
+  if(e.target.tagName == "BUTTON" && e.target.id.substring(e.target.id.length - postpix_apply_button.length, e.target.id.length) === postpix_apply_button){
+    for( index in layout){
+      if(index+postpix_apply_button == e.target.id){
+        var max_input = document.querySelector("#"+index+"_max_input");
+        var min_input = document.querySelector("#"+index+"_min_input");
+        applyScale(index, min_input.value, max_input.value);
+      }//if
+    }//for
+    applyAxis();
+    changeCicle()
+  }//if button.id
 }
 
 var set_data = function( index, data){
