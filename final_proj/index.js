@@ -32,20 +32,26 @@ app.get('/', function (req, res){
   var default_index = {
     'x' : {
       group : "economy_growth",
-      indicator_name : "GDP per capita (current US$)"
+      indicator_name : "GDP per capita (current US$)",
+      min: 20,
+      max:80000,
     },
     'y' : {
       group : "health",
-      indicator_name : "Life expectancy at birth, total (years)"
+      indicator_name : "Life expectancy at birth, total (years)",
+      min:30,
+      max:85,
     },
     'size' : {
       group : "health",
-      indicator_name : "Population, total"
+      indicator_name : "Population, total",
+      min:1000,
+      max: 2000000000,
     },
-    'bright' :  {
-      group : "education",
-      indicator_name :  "Literacy rate, adult total ",
-    },
+    // 'bright' :  {
+    //   group : "education",
+    //   indicator_name :  "Literacy rate, adult total ",
+    // },
   };
   res.render('index', {indexObj : default_index});
 });

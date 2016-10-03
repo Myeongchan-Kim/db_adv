@@ -10,16 +10,18 @@ var dataset = {
   'y' :[],
   'size' :[],
   'color' :[],
-  'maxX' : 0,
-  'maxY' : 0,
-  'minX' : 987654321,
-  'minY' : 987654321,
+  'scale' :{
+    'x': d3.scaleLog().domain([20, 80000]).range([xPadding, width-xPadding]),
+    'y': d3.scaleLinear().domain([30, 85]).range([height - yPadding, yPadding]),
+    'size' : d3.scaleSqrt().domain([1000, 2000000000]).range([5, 50]),
+  },
 };
 var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba", "China"];
 var selectedIdList = {};
-var scaleX = d3.scaleLog().domain([20, 80000]).range([xPadding, width-xPadding]);
-var scaleY = d3.scaleLinear().domain([30, 85]).range([height - yPadding, yPadding]);
-var scaleSize = d3.scaleSqrt().domain([1000, 2000000000]).range([5, 50]);
+
+// var scaleX = d3.scaleLog().domain([20, 80000]).range([xPadding, width-xPadding]);
+// var scaleY = d3.scaleLinear().domain([30, 85]).range([height - yPadding, yPadding]);
+// var scaleSize = d3.scaleSqrt().domain([1000, 2000000000]).range([5, 50]);
 var playEvent = {};
 
 var init = function (){
@@ -32,9 +34,9 @@ var init = function (){
     var svg = d3.select("#screen").append("svg");
     svg.attr("width", width).attr("height", height);
 
-    var xAxis = d3.axisBottom(scaleX).ticks(20, ",.0f");
+    var xAxis = d3.axisBottom(dataset.scale['x']).ticks(20, ",.0f");
     var xAxisSpr = svg.append("g").call(xAxis).attr("transform", "translate(0,"+(height - yPadding)+")");
-    var yAxis = d3.axisLeft(scaleY).ticks(20, ",.1f");
+    var yAxis = d3.axisLeft(dataset.scale['y']).ticks(20, ",.1f");
     var yAxisSpr = svg.append("g").call(yAxis).attr("transform", "translate("+(xPadding)+",0)");
 
     var elementEnter = svg.selectAll("circle").data(dataset['country_name']).enter();
@@ -154,6 +156,22 @@ var click_event = function (e){
 
 var set_data = function( index, data){
   dataset[index] = data.map(function(ele){return ele['value'];});
+  //console.log(JSON.stringify(dataset[index][0]));
+  var max = d3.max(dataset[index], function(d){
+    //console.log(JSON.stringify(d));
+    return d3.max(d, function (row){return Number(row.value);});
+  });
+  console.log("max:"+ max);
+  var min = d3.min(dataset[index], function(d){
+    //console.log(JSON.stringify(d));
+    return d3.min(d, function (row){return Number(row.value);});
+  });
+  console.log("min:"+ min);
+  var max_input = document.querySelector("#"+index+"_max_input");
+  max_input.value = max;
+  var min_input = document.querySelector("#"+index+"_min_input");
+  min_input.value = min;
+
 }
 
 
@@ -165,10 +183,6 @@ var changeCicle = function(){
 
 var make_circle = function (year){
   var yearData = [];
-  dataset['maxX'] = 0;
-  dataset['maxY'] = 0;
-  dataset['minX'] = 987654321;
-  dataset['minY'] = 987654321;
   for( i in dataset['country_name'])
   {
     var obj = {};
@@ -201,19 +215,19 @@ var make_circle = function (year){
   circles
     .attr("cx", function (d, i){
       if(yearData[i]['x'])
-        return scaleX(Number(yearData[i]['x']));
+        return dataset.scale['x'](Number(yearData[i]['x']));
       else
         return d['x'];
       })
     .attr("cy", function (d, i){
       if(yearData[i]['y'])
-        return scaleY(yearData[i]['y']);
+        return dataset.scale['y'](yearData[i]['y']);
       else
         return d['y'];
     })
     .attr("r", function(d,i){
       if(yearData[i]['size'])
-        return "" + scaleSize(yearData[i]['size']) +"px";
+        return "" + dataset.scale['size'](yearData[i]['size']) +"px";
       else
         return d['r'];
     });
@@ -222,13 +236,13 @@ var make_circle = function (year){
   labels
   .attr("dx", function (d, i){
     if(yearData[i]['x'])
-      return scaleX(Number(yearData[i]['x']));
+      return dataset.scale['x'](Number(yearData[i]['x']));
     else
       return d['x'];
     })
   .attr("dy", function (d, i){
     if(yearData[i]['y'])
-      return scaleY(yearData[i]['y']);
+      return dataset.scale['y'](yearData[i]['y']);
     else
       return d['y'];
   })
