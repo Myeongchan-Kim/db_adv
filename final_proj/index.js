@@ -19,6 +19,159 @@ var app = express();
 var handlebars = require('express-handlebars').create({ defaultLayout:'main'}); //템플릿
 var bodyparser = require('body-parser').urlencoded({extended:true}); //form 평문전달
 var util = require('util');
+var collectionList =[];
+
+var findValue = function(db, id, callback ){
+  console.log("result:"+JSON.stringify(id));
+  db.collection('education').aggregate([
+    {
+        $match: {
+            year : 1990,
+            "country_code" : id
+        }//match
+    },
+    {
+        $lookup : {
+          from: "_META_country",
+          localField: "country_code",
+          foreignField : "_id",
+          as :"country"
+        }
+    },
+    {
+        $lookup : {
+          from: "_META_indicator",
+          localField: "indicator_code",
+          foreignField : "_id",
+          as :"indicator"
+        }
+    },
+  ]).toArray(function(err, docs){
+    console.log(docs);
+    callback(docs);
+  });// aggregate
+};
+
+var findMongoTest = function (country_name, callback){
+  MongoClient.connect(url, function(err, db){
+    db.authenticate(mongoID, mongoPW, function (err, res){
+      if(err) throw err;
+      var collection = db.collection('_META_country');
+      //console.log(collection);
+      var country = {'country_name' : country_name};
+      collection.findOne(country, function (err, docs){
+        if(err) throw err;
+        console.log(docs['_id']);
+        var id = docs['_id'];
+        findValue(db, id, callback);
+      });
+    }); // db auth
+  }); //mongo connect
+};
+
+var findByIndicator = function (cond, callback){
+//Rural land area where elevation is below 5 meters (% of total land area)
+  MongoClient.connect(url, function(err, db){
+    db.authenticate(mongoID, mongoPW, function (err, res){
+      if(err) throw err;
+      var collection = db.collection('_META_indicator');
+      //console.log(collection);
+      var indicator = {'name' : cond.indicator_name };
+      console.log(indicator);
+      collection.findOne(indicator, function (err, docs){
+        console.log(docs);
+        var condition = ({year:cond.year, indicator_code:docs['_id']});
+        console.log(condition);
+        db.collection('environment_new').find(condition).toArray(function(err, docs){
+          if(err) throw err;
+          db.close();
+          callback(docs);
+        });
+      }); //find condition
+    }); // db auth
+  }); //mongo connect
+};
+
+var findAllCountry = function (callback){
+  MongoClient.connect(url, function(err, db){
+    db.authenticate(mongoID, mongoPW, function (err, res){
+      if(err) throw err;
+      var collection = db.collection('_META_country');
+      collection.aggregate([{
+          "$project" : { "country_name" : 1 , "region" : 1}
+      }]).toArray(function(err, docs){
+        callback(docs);
+      });
+    }); // auth
+  }); //mongo connect
+};
+
+var findAllCategory = function(callback){
+  MongoClient.connect(url, function(err, db){
+    db.authenticate(mongoID, mongoPW, function (err, res){
+      if(err) throw err;
+      var collection = db.collections(function(err, docs){
+        if(err) throw err;
+        callback(docs)
+      });
+    }); // auth
+  }); //mongo connect
+}
+
+var getAllValueOfIndicator = function (db, collectionName,indicator_id, indicator_name,callback){
+    var id_obj = new ObjectId(indicator_id);
+    var newCollectionName = "_" + indicator_name.replace(/ |\(|\$\)/gi, '');
+    db.collection(collectionName).aggregate([
+      { $match : { indicator_code : id_obj } },
+      { $out : newCollectionName }
+    ]).toArray(function (err, docs){
+      if(err) throw err;
+      var country = db.collection('_META_country');
+      country.aggregate([
+        {
+            $lookup :{
+              from: newCollectionName,
+              localField: "_id",
+              foreignField : "country_code",
+              as :"value"
+            }
+        },
+        {
+            $project :{
+                country_name : 1,
+                value :{
+                    year : 1,
+                    value : 1
+                }
+            }
+        }
+      ]).toArray(function(err, docs){
+        callback(docs);
+      });
+    }); // $out new temp collection
+}
+
+var loadIndicator = function (category, callback){
+  MongoClient.connect(url, function(err, db){
+    db.authenticate(mongoID, mongoPW, function (err, res){
+      if(err) throw err;
+      var collection = db.collection('_META_indicator');
+      collection.find({ "topic" : { "$regex" : RegExp(category)}})
+      .toArray(function(err, docs){
+        callback(docs);
+      });
+    }); // auth
+  }); //mongo connect
+};
+
+findAllCategory(function (docs){
+  for(i in docs){
+    var collection_name = docs[i].s.name;
+    if(collection_name.substring(0,1) != "_" && !collection_name.includes("."))
+      collectionList.push(collection_name);
+  }
+});
+
 
 app.use(bodyparser);
 app.use('/static', express.static(__dirname + '/static'));
@@ -53,140 +206,9 @@ app.get('/', function (req, res){
     //   indicator_name :  "Literacy rate, adult total ",
     // },
   };
-  res.render('index', {indexObj : default_index});
+  console.log(collectionList);
+  res.render('index', {indexObj : default_index, categoryList: collectionList});
 });
-
-var findValue = function(db, id, callback ){
-  console.log("result:"+JSON.stringify(id));
-  db.collection('education').aggregate([
-    {
-        $match: {
-            year : 1990,
-            "country_code" : id
-        }//match
-    },
-    {
-        $lookup : {
-          from: "country",
-          localField: "country_code",
-          foreignField : "_id",
-          as :"country"
-        }
-    },
-    {
-        $lookup : {
-          from: "indicator",
-          localField: "indicator_code",
-          foreignField : "_id",
-          as :"indicator"
-        }
-    },
-  ]).toArray(function(err, docs){
-    console.log(docs);
-    callback(docs);
-  });// aggregate
-};
-
-var findMongoTest = function (country_name, callback){
-  MongoClient.connect(url, function(err, db){
-    db.authenticate(mongoID, mongoPW, function (err, res){
-      if(err) throw err;
-      var collection = db.collection('country');
-      //console.log(collection);
-      var country = {'country_name' : country_name};
-      collection.findOne(country, function (err, docs){
-        if(err) throw err;
-        console.log(docs['_id']);
-        var id = docs['_id'];
-        findValue(db, id, callback);
-      });
-    }); // db auth
-  }); //mongo connect
-};
-
-var findByIndicator = function (cond, callback){
-//Rural land area where elevation is below 5 meters (% of total land area)
-  MongoClient.connect(url, function(err, db){
-    db.authenticate(mongoID, mongoPW, function (err, res){
-      if(err) throw err;
-      var collection = db.collection('indicator');
-      //console.log(collection);
-      var indicator = {'name' : cond.indicator_name };
-      console.log(indicator);
-      collection.findOne(indicator, function (err, docs){
-        console.log(docs);
-        var condition = ({year:cond.year, indicator_code:docs['_id']});
-        console.log(condition);
-        db.collection('environment_new').find(condition).toArray(function(err, docs){
-          if(err) throw err;
-          db.close();
-          callback(docs);
-        });
-      }); //find condition
-    }); // db auth
-  }); //mongo connect
-};
-
-var findAllCountry = function (callback){
-  MongoClient.connect(url, function(err, db){
-    db.authenticate(mongoID, mongoPW, function (err, res){
-      if(err) throw err;
-      var collection = db.collection('country');
-      collection.aggregate([{
-          "$project" : { "country_name" : 1 , "region" : 1}
-      }]).toArray(function(err, docs){
-        callback(docs);
-      });
-    }); // auth
-  }); //mongo connect
-};
-
-var getAllValueOfIndicator = function (db, collectionName,indicator_id, indicator_name,callback){
-    var id_obj = new ObjectId(indicator_id);
-    var newCollectionName = "_" + indicator_name.replace(/ |\(|\$\)/gi, '');
-    db.collection(collectionName).aggregate([
-      { $match : { indicator_code : id_obj } },
-      { $out : newCollectionName }
-    ]).toArray(function (err, docs){
-      if(err) throw err;
-      var country = db.collection('country');
-      country.aggregate([
-        {
-            $lookup :{
-              from: newCollectionName,
-              localField: "_id",
-              foreignField : "country_code",
-              as :"value"
-            }
-        },
-        {
-            $project :{
-                country_name : 1,
-                value :{
-                    year : 1,
-                    value : 1
-                }
-            }
-        }
-      ]).toArray(function(err, docs){
-        callback(docs);
-      });
-    }); // $out new temp collection
-}
-
-var loadIndicator = function (category, callback){
-  MongoClient.connect(url, function(err, db){
-    db.authenticate(mongoID, mongoPW, function (err, res){
-      if(err) throw err;
-      var collection = db.collection('indicator');
-      collection.find({ "topic" : { "$regex" : RegExp(category)}})
-      .toArray(function(err, docs){
-        callback(docs);
-      });
-    }); // auth
-  }); //mongo connect
-};
-
 
 app.get('/data-req', function(req, res){
   var condition = {
@@ -210,6 +232,20 @@ app.get('/all-country', function(req, res){
   });
 });
 
+app.get('/all-category', function(req, res){
+  findAllCategory(function (docs){
+    var collections = [];
+    for(i in docs){
+      var collection_name = docs[i].s.name;
+      console.log(collection_name.substring(0,1));
+      if(collection_name.substring(0,1) != "_" && !collection_name.includes("."))
+        collections.push(collection_name);
+    }
+    res.type('text/plain');
+    res.send(JSON.stringify(collections));
+  });
+})
+
 app.get('/indicator/:category', function(req, res){
   loadIndicator(req.params.category, function (docs){
     //console.log(req.params.category);
@@ -220,7 +256,7 @@ app.get('/indicator/:category', function(req, res){
 
 app.get('/indicator/:category/:indicator_name', function(req, res){
   MongoClient.connect(url, function(err, db){
-    var collection = db.collection('indicator');
+    var collection = db.collection('_META_indicator');
     var str = req.params.indicator_name.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
     console.log(str);
     var condition = {'name' : {$regex : new RegExp(str)} };

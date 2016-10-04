@@ -19,6 +19,16 @@ div.control_box{
   padding-bottom: 10px;
 }
 
+div.control_box dialog{
+  width:800px;
+  height:300px;
+}
+
+div.control_box dialog div.close_part{
+  position: absolute;
+  margin-top: 200px;
+}
+
 div.country_filter{
   margin-left: 10px;
   margin-bottom: 10px;
@@ -49,6 +59,12 @@ div.index_div label{
   margin-left: 10px;
   display: inline-block;
   width:40px;
+}
+
+div.index_div label.category{
+  margin-left: 10px;
+  display: inline-block;
+  width:100px;
 }
 
 div.index_div label.range{

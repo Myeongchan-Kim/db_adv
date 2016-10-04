@@ -191,7 +191,7 @@ var click_event = function (e){
     return;
   }
 
-  if(e.target.tagName == "INPUT" && e.target.id.includes("_attr")){
+  if(e.target.tagName == "BUTTON" && e.target.id.includes("_attr_change_button")){
     for( index in layout){
       if(e.target.id.includes(index)){
         console.log(index);
@@ -200,14 +200,24 @@ var click_event = function (e){
     }//for
     return;
   }
+
+  if(e.target.tagName == "BUTTON" && e.target.className.includes("close")){
+    for( index in layout){
+      if(e.target.id.includes(index)){
+        console.log(index);
+        closeDialog(index+"_search_dialog");
+      }//if
+    }//for
+  }
 }
 
 var show_dialog = function(id){
   var dialog = document.querySelector('dialog#'+id);
-  if (! dialog.showModal) {
+  console.log(dialog.showModal);
+  if (!dialog.showModal) {
     dialogPolyfill.registerDialog(dialog);
-    dialog.showModal();
   }
+  dialog.showModal();
 }
 
 var closeDialog = function(id){
