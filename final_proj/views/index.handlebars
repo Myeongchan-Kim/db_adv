@@ -8,6 +8,9 @@
       {{#each indexObj}}
       <div class="index_div" data-attr-name="{{@key}}" data-group = "{{this.group}}" data-val="{{this.indicator_name}}">
         <label for="{{@key}}_attr" class="{{@key}}">{{@key}}</label><input type=text class="attr_input" id="{{@key}}_attr" value="{{this.indicator_name}}" readonly />
+        <dialog id="{{@key}}_search_dialog" class="mdl-dialog search_box {{@key}}_search_box">
+          <input type="text" name="{{@key}}_search_input" id="{{@key}}_search_input" />
+        </dialog>
         <label for="{{@key}}_scale_type" class="{{@key}}">scale</label><select id="{{@key}}_scale_type" name="scale_type">
           <option value="linear">linear</option>
           <option value="log">log</option>

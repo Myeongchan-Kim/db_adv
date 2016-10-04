@@ -59,6 +59,8 @@ var init = function (){
 
     var labels = elementEnter.append("text");
     labels.text(filterLabel)
+    .attr("dx", -100)
+    .attr("dy", -100)
     .attr("display",filterGroup)
     .on("click", toggleLabelList)
     ;
@@ -131,6 +133,7 @@ var click_event = function (e){
   //console.log(e.target.tagName);
   if(e.target.tagName == "BUTTON" && e.target.id === "changeButton"){
     changeCicle();
+    return;
   }
 
   if(e.target.tagName == "BUTTON" && e.target.id === "playButton"){
@@ -145,11 +148,13 @@ var click_event = function (e){
       };
     }, 1200);
     console.log("start:"+playEvent);
+    return;
   }
 
   if(e.target.tagName == "BUTTON" && e.target.id === "stopButton"){
     console.log("stop:"+playEvent);
     clearInterval(playEvent);
+    return;
   }
 
   if(e.target.tagName == "BUTTON" && e.target.id === "loadData"){
@@ -163,6 +168,7 @@ var click_event = function (e){
       console.log(addr);
       xhrReq(attr_list[i].dataset.attrName, addr, set_data);
     }
+    return;
   }
 
   var postpix_apply_button = "_apply_button";
@@ -176,12 +182,37 @@ var click_event = function (e){
     }//for
     applyAxis();
     changeCicle();
+    return;
   }//if button.id
 
   if(e.target.tagName == "INPUT" && e.target.className.includes("filter_checkbox")){
     changeFilter();
     changeCicle();
+    return;
   }
+
+  if(e.target.tagName == "INPUT" && e.target.id.includes("_attr")){
+    for( index in layout){
+      if(e.target.id.includes(index)){
+        console.log(index);
+        show_dialog(index+"_search_dialog");
+      }
+    }//for
+    return;
+  }
+}
+
+var show_dialog = function(id){
+  var dialog = document.querySelector('dialog#'+id);
+  if (! dialog.showModal) {
+    dialogPolyfill.registerDialog(dialog);
+    dialog.showModal();
+  }
+}
+
+var closeDialog = function(id){
+  var dialog = document.querySelector('dialog#'+id);
+  dialog.close();
 }
 
 var set_data = function( index, data){

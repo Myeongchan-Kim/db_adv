@@ -15,6 +15,7 @@ div.control_box{
   width:900px;
   background-color : gray;
   padding-top:10px;
+  padding-left: 10px;
   padding-bottom: 10px;
 }
 
@@ -23,7 +24,7 @@ div.country_filter{
   margin-bottom: 10px;
 }
 
-button#loadData{
+div.control_box button#loadData{
   width:80px;
   height:20px;
   margin-left:10px;
