@@ -148,6 +148,7 @@ var getAllValueOfIndicator = function (db, collectionName,indicator_id, indicato
         }
       ]).toArray(function(err, docs){
         //console.log(collectionName+docs.length);
+        if(docs == null || docs.length == 0) return;
         callback(docs);
       });
     }); // $out new temp collection
@@ -324,6 +325,11 @@ app.get('/indicator/:category', function(req, res){
     res.send(JSON.stringify(docs));
   });
 });
+
+app.get('/search/indicator/:query_string', function (req, res){
+  res.type('text/plain');
+  res.send(JSON.stringify(req.params.query_string));
+})
 
 app.get('/indicator/:category/:indicator_name', function(req, res){
   MongoClient.connect(url, function(err, db){
