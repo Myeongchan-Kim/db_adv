@@ -162,19 +162,20 @@ var click_event = function (e){
 
     num_attr = 3;
     var attr_list = document.querySelectorAll("div.index_div");
+    // for(var i = 0; i < num_attr; i++){
+    //   var groupName = attr_list[i].dataset.group + "/";
+    //   var addr = encodeURI('/indicator/' + groupName + attr_list[i].dataset.val);
+    //   console.log(addr);
+    //   xhrReq(attr_list[i].dataset.attrName, addr, set_data);
+    // }
+
+    //all-category
     for(var i = 0; i < num_attr; i++){
       var groupName = attr_list[i].dataset.group + "/";
-      var addr = encodeURI('/indicator/' + groupName + attr_list[i].dataset.val);
+      var addr = encodeURI('/all-category/'+ attr_list[i].dataset.val);
       console.log(addr);
       xhrReq(attr_list[i].dataset.attrName, addr, set_data);
     }
-
-    //for test
-    // var i = 1;
-    // var groupName = attr_list[i].dataset.group + "/";
-    // var addr = encodeURI('/all-category/'+ attr_list[i].dataset.val);
-    // console.log(addr);
-    // xhrReq(attr_list[i].dataset.attrName, addr, set_data);
 
     return;
   }
@@ -212,11 +213,66 @@ var click_event = function (e){
   if(e.target.tagName == "BUTTON" && e.target.className.includes("close")){
     for( index in layout){
       if(e.target.id.includes(index)){
-        console.log(index);
+        //console.log(index);
         closeDialog(index+"_search_dialog");
       }//if
     }//for
   }
+
+  //{{@key}}_close_button
+  if(e.target.tagName == "BUTTON" && e.target.id.includes("_search_button")){
+    for( index in layout){
+      if(e.target.id.includes(index)){
+        var req_input = document.querySelector("dialog input#"+index+"_search_input");
+        var req_string = req_input.value;
+        if(req_string == "") return;
+        search_indicator_req(req_string, function(result){
+          var result_div = document.querySelector("dialog#"+index+"_search_dialog div.result_div");
+          result_div.innerHTML = "";
+          var newA = document.createElement("A");
+          newA.className = index+"_new_attr_value";
+          newA.dataset.attrName = index;
+          newA.dataset.val = result;
+          newA.innerHTML = result;
+          result_div.appendChild(newA);
+        });
+        return;
+      }//if
+    }//for
+  }
+
+  console.log(e.target.className);
+  if(e.target.tagName == "A" && e.target.className.includes("_new_attr_value")){
+    for( index in layout){
+      if(e.target.className.includes(index)){
+        var newValue = e.target.dataset.val;
+        changeNewAttr(index, newValue);
+        var dialog = document.querySelector('dialog#'+index+"_search_dialog");
+        dialog.close();
+        return;
+      }
+    }
+  }
+}
+
+var changeNewAttr = function(index, newValue){
+  var target_div = document.querySelector("div."+index+"_index_div");
+  var target_input = document.querySelector("input#"+index+"_attr");
+  target_div.dataset.attrName = index;
+  target_div.dataset.val = newValue;
+  target_input.value = newValue;
+}
+
+var search_indicator_req = function(req_string, callback){
+  var xhr = new XMLHttpRequest();
+  var address = '/search/indicator/' + req_string;
+  console.log(address);
+  xhr.open('GET', window.location.origin + address, true);
+  xhr.addEventListener("load", function (e){
+    var result  = JSON.parse(xhr.responseText);
+    callback(result);
+  });
+  xhr.send(null);
 }
 
 var show_dialog = function(id){

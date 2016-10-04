@@ -6,24 +6,25 @@
         <label for="groups_filter_chkbox">groups</label><input id="groups_filter_chkbox" type="checkbox" class="groups filter_checkbox" />
       </div>
       {{#each indexObj}}
-      <div class="index_div" data-attr-name="{{@key}}" data-group = "{{this.group}}" data-val="{{this.indicator_name}}">
+      <div class="index_div {{@key}}_index_div" data-attr-name="{{@key}}" data-group = "{{this.group}}" data-val="{{this.indicator_name}}">
         <label for="{{@key}}_attr" class="{{@key}}">{{@key}}</label>
         <input type=text class="attr_input" id="{{@key}}_attr" value="{{this.indicator_name}}" readonly />
         <button id="{{@key}}_attr_change_button" class="mdl-button mdl-button--raised mdl-js-button dialog-button">change</button>
         <dialog id="{{@key}}_search_dialog" class="mdl-dialog search_box {{@key}}_search_box">
-          <h4 class="mdl-dialog__title">{{@key}} attribute</h4>
-          <label for="{{@key}}_category" class="{{@key}} category">category</label>
+          <h3 class="mdl-dialog__title">{{@key}} attribute</h4>
+          <!-- <label for="{{@key}}_category" class="{{@key}} category">category</label>
           <select id="{{@key}}_category" name="category">
             {{#each ../categoryList}}
             <option value="{{this}}">{{this}}</option>
             {{/each}}
-          </select>
-          <input type="text" name="{{@key}}_search_input" id="{{@key}}_search_input" class="search_input"/><button>Search</button>
+          </select> -->
+          <input type="text" name="{{@key}}_search_input" id="{{@key}}_search_input" class="search_input"/>
+          <button id="{{@key}}_search_button">Search</button>
           <div class="mdl-dialog__content">
-            <div class="result_div">
-            </div>
             <div class="mdl-dialog__actions close_part">
               <button type="button" id="{{@key}}_close_button" class="mdl-button close">Close</button>
+            </div>
+            <div class="result_div">
             </div>
           </div>
         </dialog>
