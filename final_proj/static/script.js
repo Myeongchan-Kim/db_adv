@@ -21,6 +21,9 @@ var dataset = {
     'size' : d3.scaleSqrt().domain([1000, 2000000000]).range(layout['size']),
   },
 };
+var old_data = [];
+var old_init = [];
+
 var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba", "China", "OECD members", "World", "South Asia","East Asia & Pacific", "Sub-Saharan Africa (all income levels)"];
 var group_filter_word = ["&","countries","World","Asia","income","Euro","situations","Sub-Saharan","mall states", "OECD", "North America"];
 var selectedIdList = {};
@@ -31,7 +34,11 @@ var init = function (){
   xhr.open('GET', window.location.origin + '/all-country', true);
   xhr.addEventListener("load", function (e){
     var docs  = JSON.parse(xhr.responseText);
-    dataset['country_name'] = docs.map(function(ele){return ele['country_name'];});
+    dataset['country_name'] = docs.map(function(ele){
+      old_data.push({'country_name':ele['country_name']});
+      old_init.push({'country_name':ele['country_name']});
+      return ele['country_name'];
+    });
 
     var svg = d3.select("#screen").append("svg");
     svg.attr("width", width).attr("height", height);
@@ -162,6 +169,8 @@ var click_event = function (e){
 
     num_attr = 3;
     var attr_list = document.querySelectorAll("div.index_div");
+    var old_data = old_init;
+
     // for(var i = 0; i < num_attr; i++){
     //   var groupName = attr_list[i].dataset.group + "/";
     //   var addr = encodeURI('/indicator/' + groupName + attr_list[i].dataset.val);
@@ -226,22 +235,27 @@ var click_event = function (e){
         var req_input = document.querySelector("dialog input#"+index+"_search_input");
         var req_string = req_input.value;
         if(req_string == "") return;
-        search_indicator_req(req_string, function(result){
+        search_indicator_req(req_string, function(resultList){
           var result_div = document.querySelector("dialog#"+index+"_search_dialog div.result_div");
           result_div.innerHTML = "";
-          var newA = document.createElement("A");
-          newA.className = index+"_new_attr_value";
-          newA.dataset.attrName = index;
-          newA.dataset.val = result;
-          newA.innerHTML = result;
-          result_div.appendChild(newA);
+          for(i in resultList){
+            var result = resultList[i].name;
+            var newP = document.createElement("P");
+            var newA = document.createElement("A");
+            newA.className = index+"_new_attr_value";
+            newA.dataset.attrName = index;
+            newA.dataset.val = result;
+            newA.innerHTML = result;
+            newP.appendChild(newA);
+            result_div.appendChild(newP);
+          }
         });
         return;
       }//if
     }//for
   }
 
-  console.log(e.target.className);
+  //console.log(e.target.className);
   if(e.target.tagName == "A" && e.target.className.includes("_new_attr_value")){
     for( index in layout){
       if(e.target.className.includes(index)){
@@ -270,6 +284,7 @@ var search_indicator_req = function(req_string, callback){
   xhr.open('GET', window.location.origin + address, true);
   xhr.addEventListener("load", function (e){
     var result  = JSON.parse(xhr.responseText);
+    console.log(result);
     callback(result);
   });
   xhr.send(null);
@@ -277,7 +292,7 @@ var search_indicator_req = function(req_string, callback){
 
 var show_dialog = function(id){
   var dialog = document.querySelector('dialog#'+id);
-  console.log(dialog.showModal);
+  //console.log(dialog.showModal);
   if (!dialog.showModal) {
     dialogPolyfill.registerDialog(dialog);
   }
@@ -290,7 +305,9 @@ var closeDialog = function(id){
 }
 
 var set_data = function( index, data){
-  dataset[index] = data.map(function(ele){return ele['value'];});
+  dataset[index] = data.map(function(ele){
+    return ele['value'];
+  });
   var max = d3.max(dataset[index], function(d){
     return d3.max(d, function (row){return Number(row.value);});
   });
@@ -361,12 +378,16 @@ var make_circle = function (year){
   {
     var obj = {};
     obj['country_name'] = dataset['country_name'][i];
+    old_data['country_name'] = dataset['country_name'][i];
+
     for( j in dataset['x'][i]){
       if(parseInt(dataset['x'][i][j]['year']) == year){
         obj['x'] = Number(dataset['x'][i][j]['value']);
         break;
       }
     }
+
+
     for( j in dataset['y'][i]){
       if(parseInt(dataset['y'][i][j]['year']) == year){
         obj['y'] = Number(dataset['y'][i][j]['value']);
@@ -388,22 +409,42 @@ var make_circle = function (year){
   var circles = svg.selectAll("circle").transition().duration(trasitionTime);
   circles
     .attr("cx", function (d, i){
-      if(yearData[i]['x'])
-        return dataset.scale['x'](Number(yearData[i]['x']));
-      else
-        return d['x'];
+      return changeAttr(d, i, yearData[i]['x'], 'x', dataset.scale['x'](Number(yearData[i]['x'])));
+      // if(yearData[i]['x']){
+      //   old_data[i]['x'] = dataset.scale['x'](Number(yearData[i]['x']));
+      //   return dataset.scale['x'](Number(yearData[i]['x']));
+      // }
+      // else if(!!old_data[i]['x']){
+      //   console.log(old_data[i]['x']);
+      //   return old_data[i]['x'];
+      // }
+      // else
+      //   return d['x'];
       })
     .attr("cy", function (d, i){
-      if(yearData[i]['y'])
-        return dataset.scale['y'](yearData[i]['y']);
-      else
-        return d['y'];
+      return changeAttr(d, i, yearData[i]['y'], 'y', dataset.scale['y'](Number(yearData[i]['y'])));
+      // if(yearData[i]['y']){
+      //   old_data[i]['y'] = dataset.scale['y'](Number(yearData[i]['y']));
+      //   return dataset.scale['y'](Number(yearData[i]['y']));
+      // }else if(!!old_data[i]['y']){
+      //   console.log(old_data[i]['y']);
+      //   return old_data[i]['y'];
+      // }
+      // else
+      //   return d['y'];
     })
     .attr("r", function(d,i){
-      if(yearData[i]['size'])
-        return "" + dataset.scale['size'](yearData[i]['size']) +"px";
-      else
-        return d['r'];
+      return changeAttr(d, i, yearData[i]['size'], 'r', "" + dataset.scale['size'](yearData[i]['size']) +"px");
+      // if(yearData[i]['size']){
+      //   old_data[i]['r'] =  "" + dataset.scale['size'](yearData[i]['size']) +"px";
+      //   return "" + dataset.scale['size'](yearData[i]['size']) +"px";
+      // }
+      // else if(!!old_data[i]['r']){
+      //   console.log(old_data[i]['r']);
+      //   return old_data[i]['r'];
+      // }
+      // else
+      //   return d['r'];
     })
     .attr("display", filterGroup)
     ;
@@ -411,20 +452,35 @@ var make_circle = function (year){
   var labels = svg.selectAll("svg>text").transition().duration(trasitionTime);
   labels
   .attr("dx", function (d, i){
-    if(yearData[i]['x'])
-      return dataset.scale['x'](Number(yearData[i]['x']));
-    else
-      return d['x'];
-    })
+    return changeAttr(d, i, yearData[i]['x'], 'x', dataset.scale['x'](Number(yearData[i]['x'])));
+    // if(yearData[i]['x'])
+    //   return dataset.scale['x'](Number(yearData[i]['x']));
+    // else
+    //   return d['x'];
+  })
   .attr("dy", function (d, i){
-    if(yearData[i]['y'])
-      return dataset.scale['y'](yearData[i]['y']);
-    else
-      return d['y'];
+    return changeAttr(d, i, yearData[i]['y'], 'y', dataset.scale['y'](Number(yearData[i]['y'])));
+    // if(yearData[i]['y'])
+    //   return dataset.scale['y'](yearData[i]['y']);
+    // else
+    //   return d['y'];
   })
   .attr("display",filterGroup)
   ;
 };
+
+var changeAttr = function(d, i, srcValue, targetIndex, applyValue){
+  if(srcValue){
+    old_data[i][targetIndex] = applyValue;
+    return applyValue;
+  }
+  else if(!!old_data[i][targetIndex]){
+    //console.log(old_data[i][targetIndex]);
+    return old_data[i][targetIndex];
+  }
+  else
+    return d[targetIndex];
+}
 
 document.addEventListener("click", click_event);
 init();

@@ -327,8 +327,17 @@ app.get('/indicator/:category', function(req, res){
 });
 
 app.get('/search/indicator/:query_string', function (req, res){
-  res.type('text/plain');
-  res.send(JSON.stringify(req.params.query_string));
+  MongoClient.connect(url, function(err, db){
+    var collection = db.collection('_META_indicator');
+    var str = req.params.query_string.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+    console.log(str);
+    var condition = {'name' : {$regex : new RegExp(req.params.query_string)} };
+    collection.find(condition).toArray(function(err, docs){
+      if(err) throw err;
+      res.type('text/plain');
+      res.send(JSON.stringify(docs));
+    });
+  });
 })
 
 app.get('/indicator/:category/:indicator_name', function(req, res){
