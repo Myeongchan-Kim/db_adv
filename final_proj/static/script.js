@@ -7,7 +7,7 @@ var trasitionTime = 1000;
 var layout = {
   'x' : [xPadding, width-xPadding],
   'y' : [height - yPadding, yPadding],
-  'size' : [5, 50],
+  'size' : [5, 70],
 }
 var dataset = {
   'country_name' : [],
@@ -21,7 +21,8 @@ var dataset = {
     'size' : d3.scaleSqrt().domain([1000, 2000000000]).range(layout['size']),
   },
 };
-var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba", "China"];
+var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba", "China", "OECD members", "World", "South Asia","East Asia & Pacific", "Sub-Saharan Africa (all income levels)"];
+var group_filter_word = ["&","countries","World","Asia","income","Euro","situations","Sub-Saharan","mall states", "OECD", "North America"];
 var selectedIdList = {};
 var playEvent = {};
 
@@ -58,6 +59,7 @@ var init = function (){
 
     var labels = elementEnter.append("text");
     labels.text(filterLabel)
+    .attr("display",filterGroup)
     .on("click", toggleLabelList)
     ;
 
@@ -77,25 +79,34 @@ var toggleLabelList = function(d, i){
   });
 }
 
-var filterGroup = function(d,i){
-  if(dataset['country_name'][i].includes("&") ||
-    dataset['country_name'][i].includes("countries") ||
-    dataset['country_name'][i].includes("World") ||
-    dataset['country_name'][i].includes("Asia") ||
-    dataset['country_name'][i].includes("income"))
+var filter = {
+  'nations' : function(d, i){
+    for(group_id in group_filter_word){
+      if( dataset['country_name'][i].includes(group_filter_word[group_id]) ){
+        return "none";
+      }
+    }
+    return "inline";
+  }, // nation
+
+  'groups' : function(d, i){
+    for(group_id in group_filter_word){
+      if( dataset['country_name'][i].includes(group_filter_word[group_id]) )
+        return "inline";
+    }
     return "none";
-  else
-    return d;
+  }, // groups
+  'all' : function(d){ return 'inline';  },
+  'none' :function(d){ return 'none';},
 };
+var filterGroup = filter['nations'];
 
 var filterLabel = function(d, i){
-  if(selected_country.indexOf(dataset['country_name'][i]) >= 0)
-  {
+  if(selected_country.indexOf(dataset['country_name'][i]) >= 0){
     selectedIdList[i] = true;
     return dataset['country_name'][i];
   }
-  else
-  {
+  else{
     selectedIdList[i] = false;
     return "";
   }
@@ -164,8 +175,13 @@ var click_event = function (e){
       }//if
     }//for
     applyAxis();
-    changeCicle()
+    changeCicle();
   }//if button.id
+
+  if(e.target.tagName == "INPUT" && e.target.className.includes("filter_checkbox")){
+    changeFilter();
+    changeCicle();
+  }
 }
 
 var set_data = function( index, data){
@@ -210,6 +226,23 @@ var applyScale = function(index, min, max){
     console.log("scale not found");
 }
 
+var changeFilter = function(){
+  var nation_checkbox = document.querySelector("div.country_filter input.nations");
+  var group_checkbox = document.querySelector("div.country_filter input.groups");
+
+  var isNationSelectd = nation_checkbox.checked;
+  var isGroupSelected = group_checkbox.checked;
+
+  console.log("nation:"+isNationSelectd+" group:"+isGroupSelected);
+  if(isNationSelectd && isGroupSelected)
+    filterGroup = filter['all'];
+  else if (isNationSelectd)
+    filterGroup = filter['nations'];
+  else if (isGroupSelected)
+    filterGroup = filter['groups'];
+  else
+    filterGroup = filter['none'];
+}
 
 var changeCicle = function(){
   var year = document.getElementById("year_input");
@@ -266,7 +299,9 @@ var make_circle = function (year){
         return "" + dataset.scale['size'](yearData[i]['size']) +"px";
       else
         return d['r'];
-    });
+    })
+    .attr("display", filterGroup)
+    ;
 
   var labels = svg.selectAll("svg>text").transition().duration(trasitionTime);
   labels
@@ -282,6 +317,8 @@ var make_circle = function (year){
     else
       return d['y'];
   })
+  .attr("display",filterGroup)
+  ;
 };
 
 document.addEventListener("click", click_event);

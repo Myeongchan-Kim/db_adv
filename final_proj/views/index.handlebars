@@ -1,6 +1,10 @@
 <div class="main_container">
   <div class="toggleable control_box">
     <div class="attribute_wrapper">
+      <div class="country_filter">
+        <label for="nations_filter_chkbox">nations</label><input id="nations_filter_chkbox" type="checkbox" class="nations filter_checkbox" checked/>
+        <label for="groups_filter_chkbox">groups</label><input id="groups_filter_chkbox" type="checkbox" class="groups filter_checkbox" />
+      </div>
       {{#each indexObj}}
       <div class="index_div" data-attr-name="{{@key}}" data-group = "{{this.group}}" data-val="{{this.indicator_name}}">
         <label for="{{@key}}_attr" class="{{@key}}">{{@key}}</label><input type=text class="attr_input" id="{{@key}}_attr" value="{{this.indicator_name}}" readonly />

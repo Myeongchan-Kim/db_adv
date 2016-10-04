@@ -18,6 +18,11 @@ div.control_box{
   padding-bottom: 10px;
 }
 
+div.country_filter{
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
 button#loadData{
   width:80px;
   height:20px;
