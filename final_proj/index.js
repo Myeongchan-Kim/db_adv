@@ -120,6 +120,7 @@ var findAllCategory = function(callback){
 
 var getAllValueOfIndicator = function (db, collectionName,indicator_id, indicator_name,callback){
     var id_obj = new ObjectId(indicator_id);
+    console.log(collectionName);
     var newCollectionName = "_" + indicator_name.replace(/ |\(|\$\)/gi, '');
     db.collection(collectionName).aggregate([
       { $match : { indicator_code : id_obj } },
@@ -146,10 +147,51 @@ var getAllValueOfIndicator = function (db, collectionName,indicator_id, indicato
             }
         }
       ]).toArray(function(err, docs){
+        //console.log(collectionName+docs.length);
         callback(docs);
       });
     }); // $out new temp collection
 }
+
+var getAllCollectionResultOfAllindicator = function (db, i,indicator_id, indicator_name,callback){
+  if(i >= collectionList.length) return;
+  collectionName = collectionList[i];
+  var id_obj = new ObjectId(indicator_id);
+  var newCollectionName = "_" + indicator_name.replace(/ |\(|\$\)/gi, '');
+  db.collection(collectionName).aggregate([
+    { $match : { indicator_code : id_obj } },
+    { $out : newCollectionName }
+  ]).toArray(function (err, docs){
+    var country = db.collection('_META_country');
+    country.aggregate([
+      {
+          $lookup :{
+            from: newCollectionName,
+            localField: "_id",
+            foreignField : "country_code",
+            as :"value"
+          }
+      },
+      {
+          $project :{
+              country_name : 1,
+              value :{
+                  year : 1,
+                  value : 1
+              }
+          }
+      }
+    ]).toArray(function(err, docs){
+      //console.log(collectionName+docs.length);
+      if(docs[0].value.length == 0){
+        getAllCollectionResultOfAllindicator(db, i+1, indicator_id, indicator_name, callback);
+      }else{
+        callback(docs);
+      }
+    });
+
+  });
+};
 
 var loadIndicator = function (category, callback){
   MongoClient.connect(url, function(err, db){
@@ -206,8 +248,16 @@ app.get('/', function (req, res){
     //   indicator_name :  "Literacy rate, adult total ",
     // },
   };
-  console.log(collectionList);
+  //console.log(collectionList);
   res.render('index', {indexObj : default_index, categoryList: collectionList});
+});
+
+app.get('/test', function(req, res){
+  for(i in collectionList){
+    if(i<5) continue;
+    res.type('text/plain');
+    res.send(i);
+  }
 });
 
 app.get('/data-req', function(req, res){
@@ -246,6 +296,27 @@ app.get('/all-category', function(req, res){
   });
 })
 
+app.get('/all-category/:indicator_name', function(req, res){
+  MongoClient.connect(url, function(err, db){
+    var collection = db.collection('_META_indicator');
+    var condition = {'name' : req.params.indicator_name };
+    collection.findOne(condition, function (err, docs){
+      if(err) throw err;
+      // indicator  id : docs['_id']
+      // indicator name : docs['name']
+      if(docs == null) {
+        console.log("[Data load fail] condition:"+JSON.stringify(condition));
+        return;
+      }
+      getAllCollectionResultOfAllindicator(db, 0 ,docs['_id'], docs['name'], function(data){
+        if(data == null) return;
+        res.type('text/json');
+        res.send(JSON.stringify(data));
+      });
+    });
+  });
+});
+
 app.get('/indicator/:category', function(req, res){
   loadIndicator(req.params.category, function (docs){
     //console.log(req.params.category);
@@ -257,9 +328,10 @@ app.get('/indicator/:category', function(req, res){
 app.get('/indicator/:category/:indicator_name', function(req, res){
   MongoClient.connect(url, function(err, db){
     var collection = db.collection('_META_indicator');
-    var str = req.params.indicator_name.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
-    console.log(str);
-    var condition = {'name' : {$regex : new RegExp(str)} };
+    //var str = req.params.indicator_name.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+    //console.log(str);
+    var condition = {'name' : req.params.indicator_name };
+    //var condition = {'name' : {$regex : new RegExp(str)} };
     collection.findOne(condition, function (err, docs){
       if(err) throw err;
       //console.log(docs);

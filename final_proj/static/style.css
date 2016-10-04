@@ -24,6 +24,10 @@ div.control_box dialog{
   height:300px;
 }
 
+div.control_box dialog input.search_input{
+  width:400px;
+}
+
 div.control_box dialog div.close_part{
   position: absolute;
   margin-top: 200px;

@@ -168,6 +168,14 @@ var click_event = function (e){
       console.log(addr);
       xhrReq(attr_list[i].dataset.attrName, addr, set_data);
     }
+
+    //for test
+    // var i = 1;
+    // var groupName = attr_list[i].dataset.group + "/";
+    // var addr = encodeURI('/all-category/'+ attr_list[i].dataset.val);
+    // console.log(addr);
+    // xhrReq(attr_list[i].dataset.attrName, addr, set_data);
+
     return;
   }
 
