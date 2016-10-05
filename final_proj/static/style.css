@@ -21,7 +21,6 @@ div.control_box{
 
 div.control_box dialog{
   width:800px;
-  height:300px;
 }
 
 div.control_box dialog input.search_input{
@@ -29,8 +28,6 @@ div.control_box dialog input.search_input{
 }
 
 div.control_box dialog div.close_part{
-  position: absolute;
-  margin-top: 200px;
 }
 
 div.country_filter{
@@ -48,8 +45,7 @@ div.control_box button#loadData{
 div.index_div{
   float :left;
   margin-right : 20px;
-  margin-top :5px;
-  margin-bottom: 5px;
+  margin-bottom: 1px;
   width: 100%;
   overflow:hidden;
 }

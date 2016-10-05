@@ -21,6 +21,20 @@ var dataset = {
     'size' : d3.scaleSqrt().domain([1000, 2000000000]).range(layout['size']),
   },
 };
+
+var dataset_init = {
+  'country_name' : [],
+  'x' : [],
+  'y' :[],
+  'size' :[],
+  'color' :[],
+  'scale' :{
+    'x': d3.scaleLog().domain([20, 80000]).range(layout['x']),
+    'y': d3.scaleLinear().domain([30, 85]).range(layout['y']),
+    'size' : d3.scaleSqrt().domain([1000, 2000000000]).range(layout['size']),
+  },
+};
+
 var old_data = [];
 var old_init = [];
 
@@ -131,7 +145,10 @@ var xhrReq = function ( attribute, address, callback){
     callback(attribute, docs);
 
     num_attr -= 1;
-    if(num_attr == 0) changeCicle();
+    if(num_attr == 0) {
+      changeCicle();
+      alert("Load completed.");
+    }
   });
   xhr.send(null);
 }
@@ -169,7 +186,23 @@ var click_event = function (e){
 
     num_attr = 3;
     var attr_list = document.querySelectorAll("div.index_div");
-    var old_data = old_init;
+    old_data = old_init;
+
+    var svg = d3.select("#screen svg");
+    var circles = svg.selectAll("circle").transition().duration(trasitionTime);
+    circles
+    .attr("cx", 0)
+    .attr("cy", height)
+    .attr("r", "2px")
+    .attr("display", filterGroup)
+    ;
+
+    var labels = svg.selectAll("svg>text").transition().duration(trasitionTime);
+    labels
+    .attr("dx", -100)
+    .attr("dy", -100)
+    .attr("display",filterGroup)
+    ;
 
     // for(var i = 0; i < num_attr; i++){
     //   var groupName = attr_list[i].dataset.group + "/";
@@ -284,7 +317,7 @@ var search_indicator_req = function(req_string, callback){
   xhr.open('GET', window.location.origin + address, true);
   xhr.addEventListener("load", function (e){
     var result  = JSON.parse(xhr.responseText);
-    console.log(result);
+    //console.log(result);
     callback(result);
   });
   xhr.send(null);
