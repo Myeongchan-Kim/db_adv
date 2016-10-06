@@ -38,7 +38,7 @@ var dataset_init = {
 var old_data = [];
 var old_init = [];
 
-var selected_country = ["Korea, Rep.","Korea, Dem. People's Rep.", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba", "China", "OECD members", "World", "South Asia","East Asia & Pacific", "Sub-Saharan Africa (all income levels)"];
+var selected_country = ["Korea, Rep.", "Saudi Arabia", "Korea, Dem. People's Rep.", "", "Afghanistan", "United States", "Vietnam", "United Kingdom", "Sweden", "Japan", "Cuba", "China", "OECD members", "World", "South Asia","East Asia & Pacific", "Sub-Saharan Africa (all income levels)"];
 var group_filter_word = ["&","countries","World","Asia","income","Euro","situations","Sub-Saharan","mall states", "OECD", "North America"];
 var selectedIdList = {};
 var playEvent = {};
@@ -147,7 +147,7 @@ var xhrReq = function ( attribute, address, callback){
     num_attr -= 1;
     if(num_attr == 0) {
       changeCicle();
-      alert("Load completed.");
+      //alert("Load completed.");
     }
   });
   xhr.send(null);
