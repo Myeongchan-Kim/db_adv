@@ -13,7 +13,7 @@
     "express": "^4.13.4",
     "express-handlebars": "^3.0.0",
     "mongo": "^0.1.0",
-    "mongodb": "^2.2.5",
+    "mongodb": "^3.6.1",
     "mssql": "^3.3.0",
     "mysql": "^2.11.1",
     "util": "^0.10.3"
